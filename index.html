@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Lyrics">
+<meta name="theme-color" content="#141417">
+<title>Lyrics Builder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1d212b;--line:#2a2f3a;--text:#e8eaed;--muted:#9aa3b2;--accent:#e0b341;--accent2:#5b8def;--green:#3ecf8e;--red:#e0644b;}
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+  header{display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+  header h1{font-size:16px;margin:0;letter-spacing:.5px}
+  header .count{color:var(--muted);font-size:12px}
+  header .spacer{flex:1}
+  button{font:inherit;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer}
+  button:hover{border-color:var(--accent2)}
+  button.primary{background:var(--accent);color:#1a1a1a;border-color:var(--accent);font-weight:600}
+  button.ghost{background:transparent}
+  .wrap{display:flex;height:calc(100vh - 57px)}
+  .side{width:320px;border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--panel)}
+  .search{padding:10px;border-bottom:1px solid var(--line)}
+  .search input{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+  .list{overflow:auto;flex:1;position:relative}
+  .dropline{position:absolute;left:0;right:0;height:2px;background:var(--accent);border-radius:2px;display:none;pointer-events:none;z-index:3;box-shadow:0 0 4px rgba(0,0,0,.35)}
+  .dropline::before{content:"";position:absolute;left:2px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .dropline.show{display:block}
+  .row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+  .row:hover{background:var(--panel2)}
+  .row.active{background:var(--panel2);border-left:3px solid var(--accent)}
+  .row .grip{cursor:grab;color:var(--muted);opacity:0;font-size:13px;line-height:1;user-select:none;margin-right:-2px}
+  .row:hover .grip{opacity:.55}
+  .row.dragging{opacity:.4}
+  .row .dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex:0 0 auto}
+  .row.done .dot{background:var(--green)}
+  .row .meta{flex:1;min-width:0}
+  .row .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .a{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .kb{color:var(--muted);font-size:11px;flex:0 0 auto}
+  .main{flex:1;display:flex;flex-direction:column;padding:18px;overflow:auto}
+  .main h2{margin:0 0 2px}
+  .main .sub{color:var(--muted);margin-bottom:14px}
+  .split{display:flex;gap:14px;flex:1;min-height:0}
+  .col{flex:1;display:flex;flex-direction:column;min-width:0}
+  .col .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px}
+  .col .lbl:hover{color:var(--text)}
+  .col .lbl .chev{display:inline-block;font-size:9px;transition:transform .15s}
+  #wrap.side-off .side{display:none}
+  #main.ed-off .col.ed>textarea{display:none}
+  #main.ed-off .col.ed{flex:0 0 auto}
+  #main.ed-off .col.ed .chev{transform:rotate(-90deg)}
+  #main.pv-off .col.pv .pvwrap{display:none}
+  #main.pv-off .col.pv{flex:0 0 auto}
+  #main.pv-off .col.pv .chev{transform:rotate(-90deg)}
+  .fsbtn{margin-left:auto;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:7px;cursor:pointer;font-size:13px;padding:2px 8px;line-height:1.3}
+  .fsbtn:hover{color:var(--text);border-color:var(--accent2)}
+  .pvwrap{position:relative;flex:1;min-height:0;display:flex}
+  .pvwrap>.preview{flex:1}
+  #pvexit{display:none;position:absolute;top:16px;right:18px;z-index:5;background:rgba(0,0,0,.06);border:1px solid #c9c9c9;color:#333;border-radius:9px;padding:8px 14px;cursor:pointer;font-size:14px;font-family:Helvetica,Arial,sans-serif}
+  #pvexit:hover{background:rgba(0,0,0,.12)}
+  .pvwrap.fs{background:#fff}
+  .pvwrap.fs #pvexit{display:block}
+  .pvwrap.fs-max{position:fixed;inset:0;z-index:9999;background:#fff}
+  .pvwrap.fs .preview{padding:5vh 6vw}
+  .pvwrap.fs .preview .pTitle{font-size:clamp(26px,4.4vh,64px)}
+  .pvwrap.fs .preview .pSub{font-size:clamp(12px,1.9vh,24px)}
+  .pvwrap.fs .preview .pSec{font-size:clamp(12px,1.8vh,24px)}
+  .pvwrap.fs .preview .pLine{font-size:clamp(20px,3.1vh,46px);line-height:1.5}
+  #pdfoverlay{display:none;position:fixed;inset:0;z-index:9998;background:#141417;flex-direction:column}
+  #pdfoverlay.show{display:flex}
+  #pdfoverlay .pdfbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+  #pdfoverlay .pdftitle{font-weight:600;color:var(--text)}
+  #pdfoverlay .pdfsub{color:var(--muted);font-size:12px}
+  #pdfoverlay iframe{flex:1;width:100%;border:none;background:#333}
+  #home{display:none;position:fixed;inset:0;z-index:9999;background:
+      radial-gradient(1100px 620px at 78% -8%, rgba(224,179,65,.10), transparent 60%),
+      radial-gradient(760px 520px at 8% 108%, rgba(91,141,239,.07), transparent 62%),
+      var(--bg);
+    overflow:auto;
+    padding:calc(env(safe-area-inset-top) + 40px) calc(env(safe-area-inset-right) + 30px)
+            calc(env(safe-area-inset-bottom) + 40px) calc(env(safe-area-inset-left) + 30px)}
+  #home.show{display:block}
+  .homebox{width:min(1180px,100%);margin:0 auto;display:grid;gap:30px;align-content:start}
+  .homehero{display:flex;flex-direction:column;gap:14px}
+  .homehd{font-size:clamp(34px,5.4vw,56px);font-weight:800;letter-spacing:-1.4px;line-height:.98}
+  .homehd em{font-style:normal;color:var(--accent)}
+  .homesub{color:var(--muted);font-size:15px;line-height:1.5;max-width:34ch}
+  .homerule{height:2px;background:linear-gradient(90deg,var(--accent),rgba(224,179,65,0));border-radius:2px;width:88px}
+  .homesec{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:2px}
+  .homesec::after{content:"";flex:1;height:1px;background:var(--line)}
+  #homelist{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));margin-bottom:22px}
+  .hrow{display:flex;flex-direction:column;gap:12px;padding:18px;border:1px solid var(--line);border-radius:14px;
+    background:linear-gradient(180deg,var(--panel),rgba(23,26,33,.55));cursor:pointer;position:relative;
+    transition:border-color .14s,transform .14s}
+  .hrow:hover{border-color:rgba(224,179,65,.55);transform:translateY(-2px)}
+  .hrow.iscur{border-color:rgba(224,179,65,.4)}
+  .hrow .htop{display:flex;align-items:center;gap:12px}
+  .hrow .hb{font-weight:800;font-size:19px;letter-spacing:.6px;text-transform:uppercase;flex:1;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hrow .hs{color:var(--muted);font-size:12.5px;letter-spacing:.2px}
+  .hrow .hs b{color:var(--text);font-weight:600}
+  .hrow .hcur{font-size:9px;color:var(--accent);border:1px solid rgba(224,179,65,.5);border-radius:20px;
+    padding:3px 9px;letter-spacing:1px;flex:0 0 auto}
+  .hrow .hx{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:15px;opacity:0;
+    flex:0 0 auto;width:34px;height:34px;border-radius:9px}
+  .hrow:hover .hx{opacity:.55}
+  .hrow .hx:hover{color:var(--red);opacity:1;background:rgba(224,100,75,.1)}
+  /* one tick per song — lit when that song has lyrics. the book's progress, at a glance */
+  .ticks{display:flex;gap:2px;align-items:flex-end;height:16px}
+  .ticks i{flex:1;min-width:1px;height:7px;border-radius:1px;background:var(--line)}
+  .ticks i.on{height:16px;background:linear-gradient(180deg,var(--accent),rgba(224,179,65,.55))}
+  .tickbar{height:7px;border-radius:4px;background:var(--line);overflow:hidden}
+  .tickbar i{display:block;height:100%;background:var(--accent)}
+  .homeempty{color:var(--muted);border:1px dashed var(--line);border-radius:14px;padding:34px;text-align:center;line-height:1.6}
+  .homebtns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .homebtns .primary,.homebtns .ghost,.homebtns .pill{min-height:44px}
+  .homefoot{color:var(--muted);font-size:12px;margin-top:24px;border-top:1px solid var(--line);padding-top:14px;line-height:1.6}
+  @media (min-width:920px){
+    .homebox{grid-template-columns:330px 1fr;gap:44px;align-items:start}
+    .homehero{position:sticky;top:0}
+  }
+  @media (max-width:919px){ .homehd{font-size:clamp(30px,7vw,44px)} }
+  @media (prefers-reduced-motion:reduce){ .hrow{transition:none} .hrow:hover{transform:none} }
+  /* ---- touch / iPad ---- */
+  .row .mv,.slrow .mv{display:none}
+  @media (hover:none){
+    /* hover-only affordances never appear on a touchscreen, so pin them open */
+    .row .grip{display:none}
+    .row .del,.hrow .hx,.slrow .slx{opacity:.6}
+    .slrow .slgrip{display:none}
+    /* iPad Safari can't be relied on for HTML5 drag — give reordering real buttons */
+    .row .mv,.slrow .mv{display:flex;gap:2px;flex:0 0 auto}
+    .row .mv button,.slrow .mv button{width:34px;height:34px;border:1px solid var(--line);background:var(--panel2);
+      color:var(--text);border-radius:8px;font-size:11px;cursor:pointer;padding:0}
+    .slrow .mv{position:absolute;left:4px;top:50%;transform:translateY(-50%)}
+    .slrow .mv button{background:#eee;border-color:#ccc;color:#333}
+    .row{padding:12px}
+    header button,header .pill,header select{min-height:44px}
+  }
+  @media (orientation:portrait) and (max-width:1100px){
+    .split{flex-direction:column}
+    .side{width:270px}
+  }
+  @media (max-width:820px){ .side{width:220px} }
+  header{flex-wrap:wrap;row-gap:8px;padding-top:calc(env(safe-area-inset-top) * .5)}
+  #slview .pdfbar,#pdfoverlay .pdfbar{padding-top:calc(env(safe-area-inset-top) * .5 + 10px)}
+  #slview{display:none;position:fixed;inset:0;z-index:9998;background:#141417;flex-direction:column}
+  #slview.show{display:flex}
+  .slsizewrap{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;padding:0 8px}
+  .slsizewrap input{width:120px;accent-color:var(--accent)}
+  #slsizeval{min-width:26px;text-align:right}
+  .slscroll{flex:1;overflow:auto;padding:22px;display:flex;justify-content:center;align-items:flex-start}
+  .slsheet{background:#fff;color:#000;width:min(612px,100%);min-height:792px;border-radius:8px;padding:46px;box-sizing:border-box;font-family:Helvetica,Arial,sans-serif;text-align:center;position:relative}
+  .slrow{position:relative;padding:2px 6px;border-radius:6px;cursor:pointer;overflow-wrap:anywhere}
+  .slrow:hover{background:#f2f2f2}
+  .slrow.sel{background:#e8effb;box-shadow:inset 0 0 0 1px #b9cdf2}
+  .slrow.dragging{opacity:.35}
+  .slrow.editing{background:#fff8dc;box-shadow:inset 0 0 0 2px var(--accent);cursor:text}
+  .slrow [contenteditable]{outline:none;display:block}
+  .slrow .slx{position:absolute;right:6px;top:50%;transform:translateY(-50%);opacity:0;border:none;background:transparent;color:#c0392b;cursor:pointer;font-size:13px}
+  .slrow:hover .slx{opacity:.75}
+  .slrow .slgrip{position:absolute;left:8px;top:50%;transform:translateY(-50%);opacity:0;color:#999;font-size:12px;cursor:grab}
+  .slrow:hover .slgrip{opacity:.6}
+  .slsong{font-weight:700;letter-spacing:.3px;line-height:1.3}
+  .slset{font-weight:800;letter-spacing:2px;color:#111;border-top:2px solid #111;border-bottom:2px solid #111;margin:14px 8px 8px;padding:5px 6px}
+  .slrule{padding:0 6px}
+  .slrule i{display:block;border-top:2px dashed #999;margin:9px 0}
+  .slband{font-weight:800;letter-spacing:1px;margin-bottom:4px}
+  .slempty{color:#888;padding:30px}
+  .sldrop{position:absolute;left:16px;right:16px;height:3px;background:var(--accent);border-radius:2px;display:none;pointer-events:none;z-index:4}
+  .sldrop.show{display:block}
+  .slhint{color:var(--muted);font-size:11px;text-align:center;padding:7px;border-top:1px solid var(--line);background:var(--panel)}
+  .sbtn{cursor:pointer;font:inherit;font-size:13px;color:var(--accent2);background:transparent;border:1px solid var(--line);padding:3px 9px;border-radius:7px;margin-left:8px}
+  .sbtn:hover{border-color:var(--accent2);color:#fff}
+  .bankq{width:100%;box-sizing:border-box;padding:8px 10px;margin:2px 0 6px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px}
+  .bankq:focus{outline:none;border-color:var(--accent2)}
+  .bankfoot{color:var(--muted);font-size:11px;padding:2px 2px 0;display:flex;gap:10px;align-items:center}
+  .bankfoot .lnk{color:var(--accent2);cursor:pointer}
+  .bankfoot .lnk:hover{text-decoration:underline}
+  .bankrow.hide{display:none}
+  .bankrow{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:7px}
+  .bankrow:hover{background:var(--panel2)}
+  .bankrow label{flex:1;display:flex;align-items:center;gap:9px;cursor:pointer;min-width:0}
+  .bankrow .bt{font-weight:600}.bankrow .ba{color:var(--muted);font-size:13px}
+  .bankrow .bx{opacity:.5;cursor:pointer;border:none;background:transparent;color:#e0644b;font-size:14px}
+  .bankrow .bx:hover{opacity:1}
+  .bankempty{color:var(--muted);padding:14px 4px}
+  textarea{flex:1;min-height:300px;width:100%;resize:none;padding:14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:14px/1.6 ui-monospace,Menlo,Consolas,monospace}
+  .preview{flex:1;overflow-y:auto;overflow-x:hidden;background:#fff;color:#000;border-radius:10px;border:1px solid var(--line);padding:26px 30px;font-family:Helvetica,Arial,sans-serif;text-align:center}
+  .preview .pTitle{font-weight:700;font-size:20px;letter-spacing:.3px;overflow-wrap:anywhere}
+  .preview .pSub{font-weight:700;font-size:11px;color:#555;margin:5px 0 10px;padding-bottom:10px;border-bottom:1px solid #cdcdcd}
+  .preview .pSec{position:relative;font-size:var(--sl,12px);color:#888;letter-spacing:.5px;margin:20px 0 12px}
+  .preview .pSec .psLabel{cursor:pointer;border-radius:5px;padding:1px 5px}
+  .preview .pSec .psLabel:hover{color:#3a3a3a;background:#f1f1f1}
+  .preview .pSec .pEdit{opacity:0;font-size:.85em;color:#5b8def}
+  .preview .pSec .psLabel:hover .pEdit{opacity:.8}
+  .preview .pSec .psMove{position:absolute;right:6px;top:50%;transform:translateY(-50%);opacity:0;white-space:nowrap}
+  .preview .pSec:hover .psMove{opacity:.6}
+  .preview .pSec .psMove button{border:none;background:transparent;color:#5b8def;cursor:pointer;font-size:11px;padding:0 1px;line-height:1}
+  .preview .pSec .psMove button:hover{color:#2f5fc0}
+  .preview .pAdd{display:inline-block;font-size:11px;color:#bbb;opacity:.4;cursor:pointer;margin:14px 0 6px;padding:1px 9px;border:1px dashed #c9c9c9;border-radius:6px}
+  .preview .pAdd:hover{opacity:1;color:#5b8def;border-color:#5b8def}
+  .preview .pLine{font-size:var(--lp,18px);line-height:1.45;overflow-wrap:anywhere}
+  .preview .pBlank{height:8px}
+  .preview .pEmpty{color:#aa2828;font-weight:700;font-size:13px;margin-top:40px}
+  .hint{color:var(--muted);font-size:12px;margin-top:8px}
+  .empty{color:var(--muted);text-align:center;margin-top:80px}
+  .pill{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:2px 9px}
+  input[type=file]{display:none}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#08210f;padding:10px 18px;border-radius:10px;font-weight:600;opacity:0;transition:.3s;pointer-events:none}
+  .build{position:fixed;right:9px;bottom:7px;font:11px/1 ui-monospace,Menlo,Consolas,monospace;color:var(--muted);opacity:.5;z-index:5;user-select:text}
+  .build:hover{opacity:1}
+  .toast.show{opacity:1}
+  kbd{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:11px}
+  a.find{color:var(--accent2);text-decoration:none;font-size:13px;border:1px solid var(--line);padding:3px 9px;border-radius:7px}
+  a.find:hover{border-color:var(--accent2);color:#fff}
+  .brand{display:flex;align-items:center;gap:10px}
+  .psel{font:inherit;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px;max-width:260px}
+  .ghost.sm{padding:6px 10px;font-size:13px}
+  .menu{position:relative}
+  .menupop{position:absolute;right:0;top:112%;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px;display:none;flex-direction:column;min-width:200px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+  .menupop.show{display:flex}
+  .menupop button{background:transparent;border:none;color:var(--text);text-align:left;padding:8px 10px;border-radius:7px;cursor:pointer;font:inherit}
+  .menupop button:hover{background:var(--panel2)}
+  .menupop button.danger{color:#e0644b}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:100}
+  .modal.show{display:flex}
+  .modalbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;width:min(560px,92vw)}
+  .modalbox-wide{width:min(700px,95vw)}
+  .hidden{display:none}
+  .sghead,.sgrow{display:grid;grid-template-columns:1fr 1fr 78px 62px 26px;gap:6px;align-items:center}
+  .sghead{color:var(--muted);font-size:10px;letter-spacing:.5px;text-transform:uppercase;margin:2px 0 7px;padding:0 2px}
+  #sgrows{max-height:46vh;overflow:auto;display:flex;flex-direction:column;gap:6px;padding-right:2px}
+  .sgrow input{width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px}
+  .sgrow input:focus{outline:none;border-color:var(--accent2)}
+  .sgrow .sgdel{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;padding:0}
+  .sgrow .sgdel:hover{color:var(--red)}
+  .modalhd{font-size:16px;font-weight:600;margin-bottom:4px}
+  .modalsub{color:var(--muted);font-size:13px;margin-bottom:10px}
+  .modalbox textarea{width:100%;height:200px;resize:vertical;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:13px/1.5 ui-monospace,Menlo,Consolas,monospace}
+  .modalbtns{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+  .row .del{opacity:0;color:var(--muted);border:none;background:transparent;cursor:pointer;font-size:15px;padding:2px 7px;border-radius:6px;flex:0 0 auto}
+  .row:hover .del{opacity:.55}
+  .row .del:hover{opacity:1;color:#e0644b;background:var(--panel)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <button class="ghost sm" id="toglist" title="Show / hide song list">☰</button>
+    <select id="projsel" class="psel" title="Switch project"></select>
+    <button class="ghost sm" id="newproj">+ New</button>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="spacer"></div>
+  <button class="ghost" id="homebtn" title="All projects">⌂</button>
+  <button class="ghost" id="addsongs">Add songs</button>
+  <button class="ghost" id="bankbtn" title="Reusable song library across projects">Song bank</button>
+  <button class="ghost" id="setlistbtn" title="Edit the stage setlist">Setlist</button>
+  <label class="pill" style="cursor:pointer" title="Import lyrics from a .docx into matching songs">Import lyrics<input type="file" id="setlist" accept=".docx"></label>
+  <button class="primary" id="savebtn">Save</button>
+  <div class="menu">
+    <button class="ghost" id="menubtn" title="More">⋯</button>
+    <div class="menupop" id="menupop">
+      <button data-act="rename">Rename project</button>
+      <button data-act="sort">Sort songs A–Z</button>
+      <button data-act="duplicate">Duplicate project</button>
+      <button data-act="setlistpdf">Setlist editor…</button>
+      <button data-act="setlistcsv">Export setlist (.csv)</button>
+      <button data-act="export">Export project (.json)</button>
+      <button data-act="import">Import / restore (.json)</button>
+      <button data-act="delete" class="danger">Delete project</button>
+    </div>
+  </div>
+  <button class="ghost" id="preview">Preview PDF</button>
+  <button class="primary" id="gen">Generate ForScore PDF</button>
+  <input type="file" id="importproj" accept=".json" style="display:none">
+</header>
+<div class="modal" id="modal"><div class="modalbox modalbox-wide">
+  <div class="modalhd" id="modaltitle">Add songs</div>
+  <div class="modalsub" id="modalsub"></div>
+  <div id="gridmode">
+    <div class="sghead"><span>Song</span><span>Artist</span><span>Key</span><span>BPM</span><span></span></div>
+    <div id="sgrows"></div>
+    <div style="margin-top:8px"><button class="ghost" id="sgaddrow" style="font-size:13px;padding:5px 11px">+ Add row</button></div>
+  </div>
+  <textarea id="modalta" class="hidden" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="One song per line:&#10;Toxic | Britney Spears | C minor | 143&#10;Respect | Aretha Franklin | C | 115&#10;(artist / key / BPM are optional)"></textarea>
+  <div class="modalbtns">
+    <label class="pill" style="cursor:pointer;align-self:center">Fill from .docx<input type="file" id="modaldocx" accept=".docx"></label>
+    <label class="pill" style="cursor:pointer;align-self:center">Fill from .csv<input type="file" id="modalcsv" accept=".csv,.txt,.tsv"></label>
+    <button class="ghost" id="modalbank">From bank</button>
+    <button class="ghost" id="modalpaste" style="margin-right:auto">Paste a list</button>
+    <button class="ghost" id="modalcancel">Cancel</button>
+    <button class="primary" id="modalok">Add</button>
+  </div>
+</div></div>
+<div class="modal" id="bankmodal"><div class="modalbox">
+  <div class="modalhd">Song bank</div>
+  <div class="modalsub">A reusable library across all projects. Check songs to add to the current project (lyrics come along).</div>
+  <input id="bankq" class="bankq" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Search the bank…">
+  <div id="banklist" style="max-height:52vh;overflow:auto;margin:4px 0"></div>
+  <div class="bankfoot" id="bankfoot"></div>
+  <div class="modalbtns"><button class="ghost" id="bankcancel">Close</button><button class="primary" id="bankadd">Add selected to project</button></div>
+</div></div>
+<div id="home">
+  <div class="homebox">
+    <div class="homehero">
+      <div class="homehd">Lyrics<br><em>Builder</em></div>
+      <div class="homerule"></div>
+      <div class="homesub">Build a lyric book and a stage setlist from the same songs, then send clean PDFs to ForScore.</div>
+    </div>
+    <div>
+      <div class="homesec">Your projects</div>
+      <div id="homelist"></div>
+      <div class="homebtns">
+        <button class="primary" id="homenew">+ New project</button>
+        <label class="pill" style="cursor:pointer;display:flex;align-items:center">Import project (.json)<input type="file" id="homeimport" accept=".json"></label>
+        <button class="ghost" id="homebank">Song bank</button>
+        <span style="flex:1"></span>
+        <button class="ghost" id="homeclose">✕ Close</button>
+      </div>
+      <div class="homefoot">Everything is stored in this browser. Use <b>Export project (.json)</b> to back up or move to another device.</div>
+    </div>
+  </div>
+</div>
+<div id="slview">
+  <div class="pdfbar">
+    <span class="pdftitle">Setlist</span>
+    <span class="pdfsub" id="slsub"></span>
+    <span style="flex:1"></span>
+    <label class="slsizewrap" title="Font size">A<input type="range" id="slsize" min="12" max="120" step="1"><span id="slsizeval"></span></label>
+    <button class="ghost" id="slfit" title="Size it to fill one page">Fit page</button>
+    <button class="ghost" id="slfitw" title="Biggest size where the longest title still fits on one line">Fit title</button>
+    <button class="ghost" id="sladdset" title="Insert a SET header after the selected row">+ Set break</button>
+    <button class="ghost" id="sladdrule" title="Insert a divider line after the selected row">+ Line</button>
+    <button class="ghost" id="slreset" title="Rebuild from the current song list">Reset</button>
+    <button class="ghost" id="slpdf">⤓ PDF</button>
+    <button class="ghost" id="slclose">✕ Close</button>
+  </div>
+  <div class="slscroll"><div class="slsheet" id="slsheet"></div></div>
+  <div class="slhint">Click a row to select · <b>double-click to edit the text</b> · drag to reorder · ✕ removes it from the setlist (song stays in the project)</div>
+</div>
+<div id="pdfoverlay">
+  <div class="pdfbar">
+    <span class="pdftitle">PDF preview</span>
+    <span class="pdfsub" id="pdfsub"></span>
+    <span style="flex:1"></span>
+    <button class="ghost" id="pdfdl">⤓ Download</button>
+    <button class="ghost" id="pdfclose">✕ Close</button>
+  </div>
+  <iframe id="pdfframe" title="PDF preview"></iframe>
+</div>
+<div class="wrap" id="wrap">
+  <div class="side">
+    <div class="search"><input id="q" placeholder="Search songs…"></div>
+    <div class="list" id="list"></div>
+  </div>
+  <div class="main" id="main">
+    <div class="empty">Select a song on the left to add its lyrics.</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="build" id="build"></div>
+
+<script>
+const SEED_META = [{"t": "Ain't Nobody", "a": "Chaka Khan", "k": "Eb minor", "b": 104}, {"t": "All I Wanted", "a": "Paramore", "k": "F#", "b": 144}, {"t": "All The Small Things", "a": "Blink-182", "k": "C", "b": 149}, {"t": "Another One Bites The Dust", "a": "Queen", "k": "F minor", "b": 112}, {"t": "At Last", "a": "Etta James", "k": "F", "b": 87}, {"t": "Barracuda", "a": "Heart", "k": "E", "b": 137}, {"t": "Black Hole Sun", "a": "Soundgarden", "k": "A minor", "b": 117}, {"t": "Build Me Up Buttercup", "a": "The Foundations", "k": "C", "b": 134}, {"t": "Car Wash", "a": "Rose Royce", "k": "C minor", "b": 183}, {"t": "Closer", "a": "Ne-Yo", "k": "E minor", "b": 126}, {"t": "Crazy", "a": "Gnarls Barkley", "k": "G#", "b": 112}, {"t": "Creep", "a": "Radiohead", "k": "C", "b": 90}, {"t": "Cruisin'", "a": "Smokey Robinson", "k": "Ab", "b": 85}, {"t": "Don't Stop Me Now", "a": "Queen", "k": "G", "b": 159}, {"t": "Dream On", "a": "Aerosmith", "k": "F minor", "b": 74}, {"t": "Fuck You", "a": "CeeLo Green", "k": "C", "b": 127}, {"t": "Give A Little Bit", "a": "Supertramp", "k": "D", "b": 91}, {"t": "Go Your Own Way", "a": "Fleetwood Mac", "k": "G", "b": 136}, {"t": "Hard To Handle", "a": "Otis Redding", "k": "Bb", "b": 96}, {"t": "Heartbreaker", "a": "Pat Benatar", "k": "C#", "b": 156}, {"t": "Hella Good", "a": "No Doubt", "k": "G#", "b": 117}, {"t": "Higher", "a": "Creed", "k": "D", "b": 155}, {"t": "Higher And Higher", "a": "Jackie Wilson", "k": "D", "b": 96}, {"t": "Higher Ground", "a": "Stevie Wonder", "k": "C# minor", "b": 125}, {"t": "Highway To Hell", "a": "AC/DC", "k": "F# Minor", "b": 116}, {"t": "Holy Diver", "a": "Dio", "k": "C minor", "b": 93}, {"t": "Hot N Cold", "a": "Katy Perry", "k": "G", "b": 130}, {"t": "I Believe In A Thing Called Love", "a": "The Darkness", "k": "E", "b": 128}, {"t": "I Can See Clearly Now", "a": "Johnny Nash", "k": "D", "b": 123}, {"t": "I Heard It Through The Grapevine", "a": "Marvin Gaye", "k": "G#", "b": 117}, {"t": "I Put A Spell On You", "a": "Joss Stone & Jeff Beck", "k": "F# minor", "b": 58}, {"t": "I Want It That Way", "a": "Backstreet Boys", "k": "F# minor", "b": 99}, {"t": "I Want You Back", "a": "Jackson 5", "k": "Ab", "b": 98}, {"t": "I Want You To Want Me", "a": "Cheap Trick", "k": "D", "b": 206}, {"t": "I'm The Only One", "a": "Melissa Etheridge", "k": "C", "b": 85}, {"t": "I'm Your Baby Tonight", "a": "Whitney Houston", "k": "F#", "b": 165}, {"t": "I2I (Goofy Movie)", "a": "Tevin Campbell", "k": "A", "b": 128}, {"t": "If It Makes You Happy", "a": "Sheryl Crow", "k": "G", "b": 95}, {"t": "Immigrant Song", "a": "Led Zeppelin", "k": "F# minor", "b": 112}, {"t": "Kickstart My Heart", "a": "Mötley Crüe", "k": "G minor", "b": 178}, {"t": "Kiss", "a": "Prince", "k": "A", "b": 112}, {"t": "Kiss Me", "a": "Sixpence None The Richer", "k": "Eb", "b": 100}, {"t": "Knock On Wood", "a": "Eddie Floyd", "k": "E", "b": 125}, {"t": "Lady Marmalade", "a": "Patti LaBelle", "k": "D minor", "b": 118}, {"t": "Livin' La Vida Loca", "a": "Ricky Martin", "k": "C# minor", "b": 178}, {"t": "Livin' On A Prayer", "a": "Bon Jovi", "k": "E minor", "b": 122}, {"t": "Lola", "a": "The Kinks", "k": "E", "b": 152}, {"t": "Love On Top", "a": "Beyoncé", "k": "C", "b": 100}, {"t": "Lovefool", "a": "The Cardigans", "k": "A", "b": 112}, {"t": "Man! I Feel Like A Woman!", "a": "Shania Twain", "k": "Bb", "b": 123}, {"t": "Midnight Train To Georgia", "a": "Gladys Knight & The Pips", "k": "A# minor", "b": 90}, {"t": "My Own Worst Enemy", "a": "Lit", "k": "E", "b": 104}, {"t": "Natural Woman", "a": "Aretha Franklin", "k": "C", "b": 112}, {"t": "Never Too Much", "a": "Luther Vandross", "k": "D", "b": 110}, {"t": "Objection (Tango)", "a": "Shakira", "k": "B minor", "b": 89}, {"t": "On The Radio", "a": "Donna Summer", "k": "E minor", "b": 127}, {"t": "Paint It, Black", "a": "The Rolling Stones", "k": "D minor", "b": 159}, {"t": "Paranoid", "a": "Black Sabbath", "k": "E minor", "b": 163}, {"t": "Photograph", "a": "Nickelback", "k": "Eb", "b": 73}, {"t": "Pour Some Sugar On Me", "a": "Def Leppard", "k": "C# minor", "b": 85}, {"t": "Respect", "a": "Aretha Franklin", "k": "C", "b": 115}, {"t": "River Deep, Mountain High", "a": "Tina Turner", "k": "Eb", "b": 155}, {"t": "Rock With You", "a": "Michael Jackson", "k": "Eb minor", "b": 114}, {"t": "Ruby Soho", "a": "Rancid", "k": "G", "b": 162}, {"t": "Santeria", "a": "Sublime", "k": "C# minor", "b": 91}, {"t": "Separate Ways", "a": "Journey", "k": "B minor", "b": 82}, {"t": "She", "a": "Green Day", "k": "C# minor", "b": 190}, {"t": "Shine", "a": "Collective Soul", "k": "D", "b": 75}, {"t": "Shining Star", "a": "Earth, Wind & Fire", "k": "E minor", "b": 100}, {"t": "Simple Man", "a": "Lynyrd Skynyrd", "k": "C", "b": 120}, {"t": "Since U Been Gone", "a": "Kelly Clarkson", "k": "G", "b": 132}, {"t": "Sk8er Boi", "a": "Avril Lavigne", "k": "D", "b": 150}, {"t": "Somebody Told Me", "a": "The Killers", "k": "Bb", "b": 138}, {"t": "Spooky", "a": "Dusty Springfield", "k": "E minor", "b": 106}, {"t": "Still Of The Night", "a": "Whitesnake", "k": "E", "b": 100}, {"t": "Sugar, We're Goin Down", "a": "Fall Out Boy", "k": "G", "b": 162}, {"t": "Sweet Child O' Mine", "a": "Guns N' Roses", "k": "D", "b": 127}, {"t": "Take It On The Run", "a": "REO Speedwagon", "k": "G", "b": 78}, {"t": "Tears Of A Clown", "a": "Smokey Robinson", "k": "C#", "b": 128}, {"t": "The Kids Aren't Alright", "a": "The Offspring", "k": "Bb minor", "b": 100}, {"t": "The Reason", "a": "Hoobastank", "k": "B", "b": 159}, {"t": "The Trooper", "a": "Iron Maiden", "k": "E minor", "b": 160}, {"t": "Them Changes", "a": "Thundercat", "k": "E minor", "b": 81}, {"t": "This Love", "a": "Maroon 5", "k": "C minor", "b": 95}, {"t": "Toxic", "a": "Britney Spears", "k": "C minor", "b": 143}, {"t": "Umbrella", "a": "Rihanna", "k": "C# minor", "b": 87}, {"t": "Unwritten", "a": "Natasha Bedingfield", "k": "F", "b": 100}, {"t": "What I Like About You", "a": "The Romantics", "k": "A", "b": 160}, {"t": "When It's Over", "a": "Sugar Ray", "k": "G", "b": 100}, {"t": "Yeah!", "a": "Usher", "k": "G minor", "b": 105}, {"t": "You Oughta Know", "a": "Alanis Morissette", "k": "E", "b": 105}, {"t": "Your Love", "a": "The Outfield", "k": "C#", "b": 160}];
+const SEED_BAND = "THE UNTRUSTABLES";
+const BUILD = "2026.07.17g";               // bump on each ship; shown in the corner
+const OLD_KEY = "lyrics_the_untrustables_v1";                 // pre-multiproject autosave key (one-time migration)
+const uid = () => "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+// ---- storage layer: localStorage today; swap these 6 methods for API calls to go cloud ----
+const Store = {
+  index(){ try{return JSON.parse(localStorage.getItem("flb:index")||"[]");}catch(e){return [];} },
+  _setIndex(ix){ try{localStorage.setItem("flb:index",JSON.stringify(ix));}catch(e){} },
+  get(id){ try{return JSON.parse(localStorage.getItem("flb:project:"+id));}catch(e){return null;} },
+  save(p){ p.updated=Date.now(); try{localStorage.setItem("flb:project:"+p.id,JSON.stringify(p));}catch(e){}
+    let ix=Store.index().filter(x=>x.id!==p.id);
+    ix.push({id:p.id,band:p.band,n:p.songs.length,updated:p.updated});
+    ix.sort((a,b)=>b.updated-a.updated); Store._setIndex(ix); },
+  remove(id){ try{localStorage.removeItem("flb:project:"+id);}catch(e){} Store._setIndex(Store.index().filter(x=>x.id!==id)); },
+  current(){ return localStorage.getItem("flb:current"); },
+  setCurrent(id){ try{localStorage.setItem("flb:current",id);}catch(e){} },
+  bank(){ try{return JSON.parse(localStorage.getItem("flb:bank")||"[]");}catch(e){return [];} },
+  setBank(b){ try{localStorage.setItem("flb:bank",JSON.stringify(b));}catch(e){} }
+};
+
+let project=null;   // current {id, band, songs:[{t,a,k,b,lyrics}], updated}
+let data=[];        // alias to project.songs (the existing engine reads/writes this)
+let BAND="";
+let active=null;
+let _gsize=null;
+
+function persist(){ if(project){ project.songs=data; Store.save(project); } }
+
+// one-time migration: build the seed project from the baked-in setlist + any old saved lyrics
+function migrateIfNeeded(){
+  if(Store.index().length) return;
+  const seed={ id:uid(), band:SEED_BAND, songs:SEED_META.map(m=>({...m,lyrics:""})), updated:Date.now() };
+  try{ const old=JSON.parse(localStorage.getItem(OLD_KEY)||"null");
+    if(Array.isArray(old)) old.forEach(o=>{ const s=seed.songs.find(x=>x.t===o.t); if(s) s.lyrics=o.lyrics||""; });
+  }catch(e){}
+  Store.save(seed); Store.setCurrent(seed.id);
+}
+function loadProject(id){
+  const p=Store.get(id); if(!p) return;
+  project=p; data=project.songs; BAND=project.band; _gsize=null;
+  active = data.length ? 0 : null;
+  Store.setCurrent(id);
+  const h=document.getElementById("home"); if(h) h.classList.remove("show");
+  renderProjectBar(); renderList(); renderMain();
+}
+function renderProjectBar(){
+  const sel=document.getElementById("projsel"); if(!sel) return;
+  sel.innerHTML=Store.index().map(x=>`<option value="${x.id}"${project&&x.id===project.id?" selected":""}>${esc(x.band)} (${x.n})</option>`).join("");
+}
+// minimal RFC4180-ish CSV reader: handles quoted fields, escaped quotes, commas/semicolons, CRLF
+function parseCSVText(text){
+  const s=text.replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n");
+  const delim=(s.split("\n")[0].match(/;/g)||[]).length > (s.split("\n")[0].match(/,/g)||[]).length ? ";" : ",";
+  const rows=[]; let row=[], cell="", q=false;
+  for(let i=0;i<s.length;i++){
+    const c=s[i];
+    if(q){
+      if(c==='"'){ if(s[i+1]==='"'){ cell+='"'; i++; } else q=false; }
+      else cell+=c;
+    }else{
+      if(c==='"') q=true;
+      else if(c===delim){ row.push(cell); cell=""; }
+      else if(c==="\n"){ row.push(cell); rows.push(row); row=[]; cell=""; }
+      else cell+=c;
+    }
+  }
+  if(cell!==""||row.length){ row.push(cell); rows.push(row); }
+  return rows.map(r=>r.map(x=>x.trim())).filter(r=>r.some(x=>x));
+}
+// map CSV rows -> songs. Uses a header row if present, else assumes Title, Artist, Key, BPM
+function songsFromCSV(text){
+  const rows=parseCSVText(text); if(!rows.length) return [];
+  const head=rows[0].map(h=>h.toLowerCase().replace(/[^a-z]/g,""));
+  const find=(...names)=>head.findIndex(h=>names.includes(h));
+  let ti=find("title","song","songtitle","name","track"),
+      ai=find("artist","band","by","artists"),
+      ki=find("key"),
+      bi=find("bpm","tempo");
+  const hasHeader = ti>=0 || ai>=0;
+  if(!hasHeader){ ti=0; ai=1; ki=2; bi=3; }
+  return rows.slice(hasHeader?1:0).map(r=>{
+    const t=(r[ti]||"").trim(); if(!t) return null;
+    const b=String(r[bi]!=null?r[bi]:"").replace(/[^\d]/g,"");
+    return { t, a:(ai>=0&&r[ai]||"").trim(), k:(ki>=0&&r[ki]||"").trim(), b:b?parseInt(b):"", lyrics:"" };
+  }).filter(Boolean);
+}
+function parseSetlist(text){
+  return text.split("\n").map(l=>l.trim()).filter(Boolean)
+    .filter(l=>!/^[\s|:_+-]+$/.test(l))                    // drop table separator / rule rows
+    .map(l=>{
+      l=l.replace(/^\|/,"").replace(/\|$/,"").trim();       // strip outer table pipes
+      if(/^(song|title)\b/i.test(l) && /[|]/.test(l)) return null;  // header row
+      const parts=l.split(/\s*\|\s*|\s+[—–-]\s+/).map(x=>x.trim());
+      const t=parts[0]; if(!t) return null;
+      const b=(parts[3]||"").replace(/[^\d]/g,"");
+      return { t, a:parts[1]||"", k:parts[2]||"", b:b?parseInt(b):"", lyrics:"" };
+    }).filter(Boolean);
+}
+// modal
+let _modalCb=null;
+function sgRowEl(t,a,k,b){
+  const div=document.createElement("div");
+  div.innerHTML=`<div class="sgrow"><input class="sg-t" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Song title"><input class="sg-a" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Artist"><input class="sg-k" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Key"><input class="sg-b" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="numeric" placeholder="BPM"><button class="sgdel" title="Remove row">✕</button></div>`;
+  const row=div.firstChild;
+  if(t)row.querySelector(".sg-t").value=t; if(a)row.querySelector(".sg-a").value=a;
+  if(k)row.querySelector(".sg-k").value=k; if(b!==undefined&&b!==null&&b!=="")row.querySelector(".sg-b").value=b;
+  row.querySelector(".sgdel").onclick=()=>{ row.remove(); sgEnsureTrailingRow(); };
+  return row;
+}
+function sgAddRow(t,a,k,b){ const r=sgRowEl(t,a,k,b); document.getElementById("sgrows").appendChild(r); return r; }
+function sgReset(n){ document.getElementById("sgrows").innerHTML=""; for(let i=0;i<(n||0);i++) sgAddRow(); }
+function sgEnsureTrailingRow(){ const rows=[...document.querySelectorAll("#sgrows .sgrow")]; const last=rows[rows.length-1]; if(!last || last.querySelector(".sg-t").value.trim()) sgAddRow(); }
+function sgCollect(){ return [...document.querySelectorAll("#sgrows .sgrow")].map(r=>({t:r.querySelector(".sg-t").value.trim(),a:r.querySelector(".sg-a").value.trim(),k:r.querySelector(".sg-k").value.trim(),b:r.querySelector(".sg-b").value.replace(/[^\d]/g,"")})).filter(s=>s.t).map(s=>({t:s.t,a:s.a,k:s.k,b:s.b?parseInt(s.b):"",lyrics:""})); }
+function sgFill(songs){ sgReset(0); songs.forEach(s=>sgAddRow(s.t,s.a,s.k,s.b)); sgEnsureTrailingRow(); }
+function openModal(title,sub,cb){ _modalCb=cb;
+  document.getElementById("modaltitle").textContent=title;
+  document.getElementById("modalsub").textContent=sub;
+  document.getElementById("modalta").value=""; document.getElementById("modalta").classList.add("hidden");
+  document.getElementById("gridmode").classList.remove("hidden");
+  document.getElementById("modalpaste").textContent="Paste a list";
+  sgReset(4);
+  document.getElementById("modal").classList.add("show");
+  setTimeout(()=>{ const f=document.querySelector("#sgrows .sg-t"); if(f)f.focus(); },40);
+}
+function closeModal(){ document.getElementById("modal").classList.remove("show"); _modalCb=null; }
+// project actions
+function newProject(){
+  const band=prompt("New project — band / setlist name:"); if(band===null) return;
+  const p={id:uid(), band:(band.trim()||"Untitled"), songs:[], updated:Date.now()};
+  Store.save(p); loadProject(p.id);
+  openModal("Add songs to “"+p.band+"”","Fill in the columns below. Only the song title is required.", songs=>{
+    addSongsToProject(songs);
+  });
+}
+// push new songs, keep the list alphabetical (like the PDF), then open the first new one
+// so you land in a blank editor with the working “Find lyrics on Google” button
+function addSongsToProject(list){
+  if(!list.length){ toast("No songs to add"); return; }
+  const firstNew=list[0];
+  data.push(...list);
+  _gsize=null; persist();
+  active=data.indexOf(firstNew);
+  renderProjectBar(); renderList(); renderMain();
+  toast(`Added ${list.length} — opened “${firstNew.t}”`);
+}
+function addSongsFlow(){ if(!project) return;
+  openModal("Add songs","Fill in the columns below. Only the song title is required.", songs=>{
+    addSongsToProject(songs); });
+}
+function renameProject(){ if(!project) return; const n=prompt("Rename project:",project.band); if(n===null) return; project.band=n.trim()||project.band; BAND=project.band; persist(); renderProjectBar(); }
+function duplicateProject(){ if(!project) return; const p={id:uid(),band:project.band+" (copy)",songs:JSON.parse(JSON.stringify(data)),updated:Date.now()}; Store.save(p); loadProject(p.id); toast("Project duplicated"); }
+function deleteProject(){ if(!project) return; if(!confirm(`Delete project “${project.band}”? This can't be undone.`)) return;
+  Store.remove(project.id); const ix=Store.index(); if(ix.length) loadProject(ix[0].id); else { project=null;data=[];BAND="";active=null; newProject(); } }
+function dlFile(text,filename,mime){
+  const blob=new Blob([text],{type:mime||"text/plain;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+const _csv=v=>{ const s=(v==null?"":String(v)); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
+function projSlug(){ return (BAND.replace(/[^A-Za-z0-9]+/g,"_")||"Setlist"); }
+function exportSetlistCSV(){
+  if(!data.length){ toast("No songs to export"); return; }
+  const rows=[["#","Title","Artist","Key","BPM"].join(",")]
+    .concat(data.map((s,i)=>[i+1,_csv(s.t),_csv(s.a),_csv(s.k),_csv(s.b)].join(",")));
+  dlFile(rows.join("\n"), projSlug()+"_Setlist.csv","text/csv;charset=utf-8");
+  toast("Setlist CSV exported");
+}
+function exportProject(){ if(!project) return; persist(); const blob=new Blob([JSON.stringify(project,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=(project.band.replace(/[^A-Za-z0-9]+/g,"_")||"project")+".flbproj.json"; a.click(); }
+function importProjectFile(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    let o; try{ o=JSON.parse(r.result); }catch(e){ toast("Couldn't read that file"); return; }
+    const title=s=>s&&(s.t!=null?s.t:s.title);
+    const lyr=s=>s&&(s.lyrics!=null?s.lyrics:s.l);
+    if(Array.isArray(o)){
+      // old-style lyrics backup: [{t/title, lyrics}] — merge by title, CREATING songs that
+      // don't exist yet (pulling artist/key/BPM from the built-in setlist when known)
+      if(!project){ const p={id:uid(),band:(SEED_BAND||"Lyrics"),songs:[],updated:Date.now()}; Store.save(p); loadProject(p.id); }
+      const key=t=>norm(t||"");
+      const metaIdx={}; SEED_META.forEach(m=>metaIdx[key(m.t)]=m);
+      const idx={}; data.forEach(d=>idx[key(d.t)]=d);
+      let merged=0, added=0;
+      o.forEach(s=>{ const tt=title(s); if(tt==null) return; const k=key(tt);
+        let d=idx[k];
+        if(!d){ const m=metaIdx[k]||{}; d={t:tt, a:m.a||"", k:m.k||"", b:(m.b!=null?m.b:""), lyrics:""}; data.push(d); idx[k]=d; added++; }
+        else merged++;
+        d.lyrics=lyr(s)||"";
+      });
+      _gsize=null; persist(); loadProject(project.id);
+      toast(`Imported ${merged+added} songs${added?` (${added} new)`:""}`);
+    } else if(o && Array.isArray(o.songs)){
+      o.id=uid(); o.band=o.band||"Imported"; Store.save(o); loadProject(o.id); toast("Project imported");
+    } else { toast("Unrecognized .json format"); }
+  };
+  r.readAsText(file);
+}
+// ---- collapsible panels ----
+function toggleCol(which){ document.getElementById("main").classList.toggle(which==="ed"?"ed-off":"pv-off"); }
+let _fsMax=false;
+function togglePreviewFS(){
+  const wrap=document.getElementById("pvwrap"); if(!wrap) return;
+  if(wrap.classList.contains("fs")){                       // exit
+    if(document.fullscreenElement===wrap && document.exitFullscreen) document.exitFullscreen();
+    else { wrap.classList.remove("fs","fs-max"); _fsMax=false; }
+    return;
+  }
+  const req=wrap.requestFullscreen;                          // enter
+  if(req) req.call(wrap).catch(()=>{ _fsMax=true; wrap.classList.add("fs","fs-max"); });
+  else { _fsMax=true; wrap.classList.add("fs","fs-max"); }
+}
+document.addEventListener("fullscreenchange",()=>{
+  const wrap=document.getElementById("pvwrap"); if(!wrap) return;
+  if(document.fullscreenElement===wrap) wrap.classList.add("fs");
+  else if(!_fsMax) wrap.classList.remove("fs","fs-max");
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && _fsMax){ const w=document.getElementById("pvwrap"); if(w){ w.classList.remove("fs","fs-max"); _fsMax=false; } } });
+// ---- export a single song as its own PDF ----
+function exportSongPDF(){
+  if(active===null) return;
+  const s=data[active];
+  if(!s.lyrics.trim()){ toast("Add lyrics first"); return; }
+  buildPDF({songs:[s],toc:false}).save((s.t.replace(/[^A-Za-z0-9]+/g,"_")||"Song")+".pdf");
+  toast(`Saved “${s.t}” as PDF`);
+}
+// ---- song bank (a reusable library across projects) ----
+function addToBank(){
+  if(active===null) return;
+  const s=data[active], b=Store.bank(), k=norm(s.t);
+  const entry={t:s.t,a:s.a,k:s.k,b:s.b,lyrics:s.lyrics};
+  const i=b.findIndex(x=>norm(x.t)===k);
+  if(i>=0) b[i]=entry; else b.push(entry);
+  b.sort((x,y)=>norm(x.t).localeCompare(norm(y.t)));
+  Store.setBank(b); toast(`Saved “${s.t}” to song bank (${b.length})`);
+}
+function openBank(){ const q=document.getElementById("bankq"); if(q) q.value=""; renderBankList(); document.getElementById("bankmodal").classList.add("show"); setTimeout(()=>q&&q.focus(),40); }
+function closeBank(){ document.getElementById("bankmodal").classList.remove("show"); }
+function addAllToBank(){
+  if(!data.length){ toast("No songs in this project"); return; }
+  if(!confirm(`Add all ${data.length} songs to the song bank?\n\nSongs already in the bank will be updated with this project's version.`)) return;
+  const b=Store.bank();
+  let added=0, updated=0;
+  data.forEach(s=>{
+    const entry={t:s.t,a:s.a,k:s.k,b:s.b,lyrics:s.lyrics};
+    const i=b.findIndex(x=>norm(x.t)===norm(s.t));
+    if(i>=0){ b[i]=entry; updated++; } else { b.push(entry); added++; }
+  });
+  b.sort((x,y)=>norm(x.t).localeCompare(norm(y.t)));
+  Store.setBank(b);
+  toast(`Bank: ${added} added${updated?`, ${updated} updated`:""} (${b.length} total)`);
+}
+/* ---------- setlist editor ---------- */
+// model: project.setlist = [{k:"song",t:"Title"} | {k:"set"} | {k:"rule"}], project.slsize = px
+let _slSel=null, _slFrom=null, _slAt=null;
+function slItems(){
+  if(!project) return [];
+  if(!Array.isArray(project.setlist) || !project.setlist.length) project.setlist=data.map(s=>({k:"song",t:s.t}));
+  return project.setlist;
+}
+function slSize(){ return (project && project.slsize) || 26; }
+function slSetSize(px){ if(!project) return; project.slsize=px; persist();
+  document.getElementById("slsizeval").textContent=px;
+  document.getElementById("slsize").value=px; renderSetlist(); }
+function renderSetlist(){
+  const items=slItems(), sheet=document.getElementById("slsheet"); if(!sheet) return;
+  const size=slSize();
+  if(!items.length){ sheet.innerHTML='<div class="slempty">Setlist is empty — hit Reset to rebuild it from your song list.</div>'; return; }
+  let setN=0;
+  let html=`<div class="slband" style="font-size:${Math.max(11,Math.round(size*.5))}px">${esc(BAND.toUpperCase())}</div>`;
+  items.forEach((it,i)=>{
+    const sel=_slSel===i?" sel":"";
+    const ctl=`<span class="slgrip">⠿</span><span class="mv"><button title="Move up" onclick="event.stopPropagation();slMoveTo(${i},${i-1})">▲</button><button title="Move down" onclick="event.stopPropagation();slMoveTo(${i},${i+2})">▼</button></span><button class="slx" title="Remove from setlist" onclick="event.stopPropagation();slDelete(${i})">✕</button>`;
+    if(it.k==="set"){ setN++;
+      const lab=it.label?it.label.toUpperCase():("SET "+setN);
+      html+=`<div class="slrow slset${sel}" data-i="${i}" draggable="true" style="font-size:${Math.round(size*.62)}px">${ctl}<span class="sltx">${esc(lab)}</span></div>`;
+    } else if(it.k==="rule"){
+      html+=`<div class="slrow slrule${sel}" data-i="${i}" draggable="true">${ctl}<i></i></div>`;
+    } else {
+      html+=`<div class="slrow slsong${sel}" data-i="${i}" draggable="true" style="font-size:${size}px">${ctl}<span class="sltx">${esc(it.t.toUpperCase())}</span></div>`;
+    }
+  });
+  html+=`<div class="sldrop" id="sldrop"></div>`;
+  sheet.innerHTML=html;
+  sheet.querySelectorAll(".slrow").forEach(r=>{
+    const i=+r.dataset.i;
+    r.onclick=()=>{ if(r.classList.contains("editing")) return; _slSel=(_slSel===i?null:i); renderSetlist(); };
+    r.ondblclick=ev=>{ ev.stopPropagation(); slEdit(i); };
+    r.addEventListener("dragstart",ev=>{ _slFrom=i; setTimeout(()=>r.classList.add("dragging"),0); ev.dataTransfer.effectAllowed="move"; try{ev.dataTransfer.setData("text/plain",String(i));}catch(e){} });
+    r.addEventListener("dragend",()=>{ r.classList.remove("dragging"); slHideDrop(); _slFrom=null; });
+  });
+  const counts=items.reduce((a,it)=>{a[it.k]=(a[it.k]||0)+1;return a;},{});
+  document.getElementById("slsub").textContent=`${counts.song||0} songs${counts.set?` · ${counts.set} sets`:""}`;
+}
+function slInsertAt(){ return _slSel!==null ? _slSel+1 : slItems().length; }
+function slAdd(kind){
+  const items=slItems(); const at=slInsertAt();
+  items.splice(at,0,{k:kind});
+  _slSel=at; persist(); renderSetlist();
+}
+function slDelete(i){ const items=slItems(); items.splice(i,1); if(_slSel===i)_slSel=null; else if(_slSel>i)_slSel--; persist(); renderSetlist(); }
+function slReset(){
+  if(!confirm("Rebuild the setlist from the current song list?\n\nSet breaks and divider lines will be removed.")) return;
+  project.setlist=data.map(s=>({k:"song",t:s.t})); _slSel=null; persist(); renderSetlist(); toast("Setlist rebuilt from song list");
+}
+function slHideDrop(){ const d=document.getElementById("sldrop"); if(d) d.classList.remove("show"); _slAt=null; }
+function slInsertIndexAt(clientY){
+  const rows=[...document.querySelectorAll("#slsheet .slrow")];
+  for(const r of rows){ const b=r.getBoundingClientRect(); if(clientY < b.top+b.height/2) return +r.dataset.i; }
+  return slItems().length;
+}
+function slShowDrop(idx){
+  const d=document.getElementById("sldrop"); if(!d) return;
+  const rows=[...document.querySelectorAll("#slsheet .slrow")];
+  let top;
+  if(idx>=rows.length){ const last=rows[rows.length-1]; top=last?last.offsetTop+last.offsetHeight:0; }
+  else top=rows[idx].offsetTop;
+  d.style.top=(top-2)+"px"; d.classList.add("show");
+}
+function slMoveTo(from,at){
+  if(from==null) return;
+  const items=slItems();
+  if(at<0||at>items.length) return;                             // ▲ on first / ▼ on last = no-op
+  if(at===from||at===from+1) return;
+  const moving=items[from];
+  items.splice(from,1);
+  items.splice(at>from?at-1:at,0,moving);
+  _slSel=null; persist(); renderSetlist();
+}
+// double-click a row to retype it: songs edit their setlist text (project song title is untouched),
+// set rows take a custom label (blank = back to auto "SET n"). Enter saves, Esc cancels.
+function slEdit(i){
+  const items=slItems(), it=items[i]; if(!it || it.k==="rule") return;
+  const row=document.querySelector(`#slsheet .slrow[data-i="${i}"]`); if(!row) return;
+  const span=row.querySelector(".sltx"); if(!span) return;
+  row.draggable=false; row.classList.add("editing");
+  span.setAttribute("contenteditable","true"); span.focus();
+  const sel=window.getSelection(), rng=document.createRange();
+  rng.selectNodeContents(span); sel.removeAllRanges(); sel.addRange(rng);
+  let done=false;
+  const commit=save=>{
+    if(done) return; done=true;
+    const txt=span.textContent.replace(/\s+/g," ").trim();
+    span.removeAttribute("contenteditable"); row.classList.remove("editing"); row.draggable=true;
+    if(save){
+      if(it.k==="song"){ if(txt) it.t=txt; }
+      else { it.label = txt || ""; }                 // blank set label -> auto-number again
+      persist();
+    }
+    renderSetlist();
+  };
+  span.onblur=()=>commit(true);
+  span.onkeydown=e=>{
+    if(e.key==="Enter"){ e.preventDefault(); commit(true); }
+    else if(e.key==="Escape"){ e.preventDefault(); commit(false); }
+    e.stopPropagation();                             // don't let Esc close the whole view
+  };
+}
+// biggest size where every title still fits on ONE line of the real PDF page
+function slFitTitle(){
+  const items=slItems().filter(it=>it.k==="song"); if(!items.length){ toast("No songs in the setlist"); return; }
+  const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:"pt",format:"letter"});
+  const W=doc.internal.pageSize.getWidth(), M=46, avail=W-M*2-20;
+  doc.setFont("helvetica","bold");
+  let longest=items[0].t;
+  doc.setFontSize(50);
+  items.forEach(it=>{ if(doc.getTextWidth(it.t.toUpperCase())>doc.getTextWidth(longest.toUpperCase())) longest=it.t; });
+  for(let px=120;px>=12;px--){
+    doc.setFontSize(px);
+    if(doc.getTextWidth(longest.toUpperCase())<=avail){ slSetSize(px); toast(`Sized to ${px} — “${longest}” fits one line`); return; }
+  }
+  slSetSize(12); toast("Even at 12 the longest title needs to wrap");
+}
+function slFit(){
+  const items=slItems(); if(!items.length) return;
+  const H=792, M=46, avail=H-M*2-30;                       // letter page minus margins and band header
+  for(let px=60;px>=12;px--){
+    const h=items.reduce((a,it)=> a + (it.k==="song"?px*1.34 : it.k==="set"?px*1.25 : px*.5), 0);
+    if(h<=avail){ slSetSize(px); toast("Sized to fit one page ("+px+")"); return; }
+  }
+  slSetSize(12); toast("Setlist is long — even 12 needs more than one page");
+}
+function slExportPDF(){
+  const items=slItems(); if(!items.length){ toast("Setlist is empty"); return; }
+  const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:"pt",format:"letter"});
+  const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), M=46;
+  const size=slSize(); let y=0, setN=0;
+  const head=()=>{ y=M+14; doc.setFont("helvetica","bold").setFontSize(Math.max(9,Math.round(size*.5))).setTextColor(90)
+      .text(BAND.toUpperCase(),W/2,y,{align:"center"}); y+=Math.round(size*.9); };
+  head();
+  items.forEach(it=>{
+    if(it.k==="rule"){
+      if(y+size*.5>H-M){ doc.addPage(); head(); }
+      doc.setDrawColor(150).setLineDashPattern([4,3],0).setLineWidth(1.4).line(M+30,y-size*.28,W-M-30,y-size*.28);
+      doc.setLineDashPattern([],0); y+=size*.6; return;
+    }
+    if(it.k==="set"){
+      setN++;
+      if(y+size*1.5>H-M){ doc.addPage(); head(); }
+      y+=size*.34;
+      const fs=Math.round(size*.62);
+      doc.setDrawColor(20).setLineWidth(1.6).line(M+24,y-fs*.95,W-M-24,y-fs*.95);
+      doc.setFont("helvetica","bold").setFontSize(fs).setTextColor(0).text(it.label?it.label.toUpperCase():("SET "+setN),W/2,y,{align:"center"});
+      doc.line(M+24,y+fs*.34,W-M-24,y+fs*.34);
+      y+=size*.92; return;
+    }
+    doc.setFont("helvetica","bold").setFontSize(size).setTextColor(0);
+    const lines=doc.splitTextToSize(it.t.toUpperCase(),W-M*2-20);
+    lines.forEach(ln=>{ if(y>H-M){ doc.addPage(); head(); } doc.text(ln,W/2,y,{align:"center"}); y+=size*1.34; });
+  });
+  doc.save(projSlug()+"_Setlist.pdf");
+  toast("Setlist PDF saved");
+}
+function openSetlist(){
+  if(!project){ toast("Open or create a project first"); return; }
+  _slSel=null; slItems();
+  const sz=slSize(); document.getElementById("slsize").value=sz; document.getElementById("slsizeval").textContent=sz;
+  renderSetlist(); document.getElementById("slview").classList.add("show");
+}
+function closeSetlist(){ document.getElementById("slview").classList.remove("show"); }
+function initSetlistUI(){
+  const sheet=document.getElementById("slsheet");
+  sheet.addEventListener("dragover",ev=>{ if(_slFrom===null) return; ev.preventDefault(); ev.dataTransfer.dropEffect="move"; _slAt=slInsertIndexAt(ev.clientY); slShowDrop(_slAt); });
+  sheet.addEventListener("dragleave",ev=>{ if(!sheet.contains(ev.relatedTarget)) slHideDrop(); });
+  sheet.addEventListener("drop",ev=>{ if(_slFrom===null) return; ev.preventDefault(); const at=_slAt!==null?_slAt:slInsertIndexAt(ev.clientY); slHideDrop(); slMoveTo(_slFrom,at); _slFrom=null; });
+  document.getElementById("setlistbtn").onclick=openSetlist;
+  document.getElementById("slclose").onclick=closeSetlist;
+  document.getElementById("sladdset").onclick=()=>slAdd("set");
+  document.getElementById("sladdrule").onclick=()=>slAdd("rule");
+  document.getElementById("slreset").onclick=slReset;
+  document.getElementById("slfit").onclick=slFit;
+  document.getElementById("slfitw").onclick=slFitTitle;
+  document.getElementById("slpdf").onclick=slExportPDF;
+  document.getElementById("slsize").oninput=e=>slSetSize(+e.target.value);
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape" && document.getElementById("slview").classList.contains("show")) closeSetlist(); });
+}
+/* ---------- landing screen ---------- */
+function fmtWhen(ts){
+  if(!ts) return "";
+  const d=Math.floor((Date.now()-ts)/86400000);
+  if(d<=0) return "today";
+  if(d===1) return "yesterday";
+  if(d<30) return d+" days ago";
+  return new Date(ts).toLocaleDateString();
+}
+function renderHome(){
+  const ix=Store.index(), el=document.getElementById("homelist"), cur=Store.current();
+  document.getElementById("homeclose").style.display = project ? "" : "none";
+  if(!ix.length){ el.innerHTML='<div class="homeempty">No projects yet.<br>Create one to start building a lyric book.</div>'; return; }
+  el.innerHTML=ix.map(x=>{
+    const p=Store.get(x.id);
+    const songs=p?p.songs:[];
+    const n=songs.length||x.n||0;
+    const done=songs.filter(s=>(s.lyrics||"").trim()).length;
+    // one tick per song, lit when it has lyrics; long books fall back to a single bar
+    const meter = !n ? ""
+      : n<=140 ? `<div class="ticks">${songs.map(s=>`<i class="${(s.lyrics||"").trim()?"on":""}"></i>`).join("")}</div>`
+      : `<div class="tickbar"><i style="width:${Math.round(done/n*100)}%"></i></div>`;
+    return `<div class="hrow${x.id===cur?" iscur":""}" data-id="${x.id}">
+      <div class="htop">
+        <div class="hb">${esc(x.band)}</div>
+        ${x.id===cur?'<span class="hcur">CURRENT</span>':""}
+        <button class="hx" title="Delete project">✕</button>
+      </div>
+      ${meter}
+      <div class="hs"><b>${n}</b> songs · <b>${done}</b> with lyrics · ${fmtWhen(x.updated)}</div>
+    </div>`;
+  }).join("");
+  el.querySelectorAll(".hrow").forEach(r=>{
+    const id=r.dataset.id;
+    r.onclick=()=>{ loadProject(id); closeHome(); };
+    r.querySelector(".hx").onclick=ev=>{ ev.stopPropagation(); const p=Store.get(id);
+      if(!confirm(`Delete “${p?p.band:"this project"}” and its lyrics?\n\nThis can't be undone.`)) return;
+      Store.remove(id);
+      if(project && project.id===id){ project=null; data=[]; active=null;
+        document.getElementById("main").innerHTML='<div class="empty">Select a song on the left to add its lyrics.</div>';
+        renderProjectBar(); renderList(); }
+      renderHome(); toast("Project deleted");
+    };
+  });
+}
+function openHome(){ renderHome(); document.getElementById("home").classList.add("show"); }
+function closeHome(){ if(!project) { toast("Open or create a project first"); return; } document.getElementById("home").classList.remove("show"); }
+function initHomeUI(){
+  document.getElementById("homebtn").onclick=openHome;
+  document.getElementById("homeclose").onclick=closeHome;
+  document.getElementById("homenew").onclick=()=>{ document.getElementById("home").classList.remove("show"); newProject(); if(!project) openHome(); };
+  document.getElementById("homebank").onclick=openBank;
+  document.getElementById("homeimport").onchange=e=>{ const f=e.target.files[0]; if(f) importProjectFile(f); e.target.value=""; };
+}
+function renderBankList(){
+  const b=Store.bank(), el=document.getElementById("banklist");
+  if(!b.length){ el.innerHTML='<div class="bankempty">The bank is empty. Open a song and click “Add to bank” to save it here for reuse.</div>'; updateBankFoot(); return; }
+  el.innerHTML=b.map((s,i)=>`<div class="bankrow" data-s="${esc(norm(s.t+" "+(s.a||"")))}"><label><input type="checkbox" value="${i}"><span class="bt">${esc(s.t)}</span> <span class="ba">${esc(s.a||"")}</span></label><button class="bx" title="Remove from bank" onclick="removeBankAt(${i})">✕</button></div>`).join("");
+  filterBank(); 
+}
+// hide non-matching rows instead of re-rendering, so checkmarks survive a search
+function filterBank(){
+  const q=norm(document.getElementById("bankq").value||"");
+  document.querySelectorAll("#banklist .bankrow").forEach(r=>{
+    r.classList.toggle("hide", !!q && !r.dataset.s.includes(q));
+  });
+  updateBankFoot();
+}
+function updateBankFoot(){
+  const foot=document.getElementById("bankfoot"); if(!foot) return;
+  const all=[...document.querySelectorAll("#banklist .bankrow")];
+  const vis=all.filter(r=>!r.classList.contains("hide"));
+  const checked=document.querySelectorAll("#banklist input:checked").length;
+  foot.innerHTML = all.length
+    ? `${vis.length} of ${all.length} shown · ${checked} selected <span class="lnk" onclick="bankSelectVisible(true)">Select shown</span><span class="lnk" onclick="bankSelectVisible(false)">Clear</span>`
+    : "";
+}
+function bankSelectVisible(on){
+  document.querySelectorAll("#banklist .bankrow").forEach(r=>{
+    if(r.classList.contains("hide")) return;
+    const c=r.querySelector("input"); if(c) c.checked=on;
+  });
+  updateBankFoot();
+}
+function removeBankAt(i){ const b=Store.bank(); b.splice(i,1); Store.setBank(b); renderBankList(); }
+function bankAddSelected(){
+  if(!project){ const p={id:uid(),band:(SEED_BAND||"Lyrics"),songs:[],updated:Date.now()}; Store.save(p); loadProject(p.id); }
+  const b=Store.bank();
+  const checked=[...document.querySelectorAll("#banklist input:checked")].map(c=>b[+c.value]).filter(Boolean);
+  if(!checked.length){ toast("Check some songs first"); return; }
+  const have={}; data.forEach(d=>have[norm(d.t)]=1);
+  let n=0; checked.forEach(s=>{ if(!have[norm(s.t)]){ data.push({t:s.t,a:s.a||"",k:s.k||"",b:(s.b!=null?s.b:""),lyrics:s.lyrics||""}); n++; } });
+  _gsize=null; persist(); loadProject(project.id); closeBank(); toast(n?`Added ${n} songs from the bank`:"Those songs are already in this project");
+}
+
+// ---- helpers ----
+const norm = t => t.toUpperCase().replace(/^(THE|A|AN)\s+/,"").replace(/[^A-Z0-9]/g,"");
+const SECTION = /^\[?\s*(VERSE|CHORUS|PRE[-\s]?CHORUS|POST[-\s]?CHORUS|BRIDGE|INTRO|OUTRO|HOOK|REFRAIN|INTERLUDE|BREAKDOWN|VAMP|TAG|SOLO|INSTRUMENTAL|CODA|ENDING|CHANT|MIDDLE\s?EIGHT|BUILD|DROP|RAP|PART)\s*\d*\s*\]?$/i;
+const isNone = s => /^\[?\s*(NONE|NO LABEL|NO SECTION)\s*\]?$/i.test((s||"").trim());
+function parseBlocks(text){
+  // A new block starts at a blank line OR at a section-label line (CHORUS, VERSE 2, [Bridge]…),
+  // so labels embedded in the text — with or without blank lines around them — are recognized.
+  const blocks=[]; let cur=null;
+  const flush=()=>{ if(cur && cur.lines.length) blocks.push({section:cur.section, lines:cur.lines}); cur=null; };
+  for(const raw of text.replace(/\r/g,"").split("\n")){
+    const line=raw.trim();
+    if(!line){ if(cur && cur.lines.length) flush(); continue; }          // blank = break
+    if(SECTION.test(line)||isNone(line)){ flush(); cur={section:line.replace(/^\[|\]$/g,"").trim(), lines:[]}; continue; } // label = new section
+    if(!cur) cur={section:"", lines:[]};
+    cur.lines.push(line);
+  }
+  flush();
+  return blocks;
+}
+// When a song is one unbroken block (no blank lines, no labels), split it into verse/chorus
+// by line repetition: a run of >=3 lines that recur elsewhere (ignoring ad-lib parentheticals)
+// is the CHORUS; the stretches between are VERSE 1,2,3...
+function segmentFlat(lines){
+  const N=lines.length; if(N<8) return null;
+  const key=l=>l.replace(/\([^)]*\)/g,"").toUpperCase().replace(/[^A-Z0-9 ]/g,"").replace(/\s+/g," ").trim();
+  const K=lines.map(key);
+  const freq={}; K.forEach(k=>{ if(k) freq[k]=(freq[k]||0)+1; });
+  const rep=K.map(k=> !!k && freq[k]>=2);
+  let runs=[],i=0;
+  while(i<N){ let j=i; while(j<N && rep[j]===rep[i]) j++; runs.push({rep:rep[i],a:i,b:j}); i=j; }
+  runs.forEach(r=>{ r.chorus = r.rep && (r.b-r.a)>=3; });   // only a 3+ repeated run counts as chorus
+  const merged=[];
+  for(const r of runs){
+    if(!r.chorus && merged.length && !merged[merged.length-1].chorus) merged[merged.length-1].b=r.b;
+    else merged.push({chorus:r.chorus,a:r.a,b:r.b});
+  }
+  if(merged.length<2 || !merged.some(s=>s.chorus)) return null;
+  let v=0;
+  return merged.map(s=>{ const ls=lines.slice(s.a,s.b); if(s.chorus) return {section:"CHORUS",lines:ls}; v++; return {section:"VERSE "+v,lines:ls}; });
+}
+// Smart auto-sections: a block built mostly of lines that recur elsewhere = CHORUS;
+// other blocks = VERSE 1,2,3... Explicit labels (CHORUS / Verse 2 / [Bridge]) always win.
+// Each returned block carries _src (its source-stanza indices) so labels can be renamed.
+function autoSection(blocks){
+  if(!blocks || blocks.length===0) return [];
+  const nl=l=>l.trim().toUpperCase();
+  const lineCount={};
+  blocks.forEach(b=>b.lines.forEach(l=>{const k=nl(l); if(k) lineCount[k]=(lineCount[k]||0)+1;}));
+  // a block is a chorus if most of its lines also appear elsewhere in the song (catches
+  // near-identical repeats that differ by an ad-lib or an extra trailing line)
+  const repFrac=b=>{ if(!b.lines.length) return 0; let r=0; b.lines.forEach(l=>{ if(lineCount[nl(l)]>=2) r++; }); return r/b.lines.length; };
+  const chorusOf=b=> b.lines.length>=2 && repFrac(b)>=0.6;
+  // fold short, unlabeled, non-chorus tag blocks (<=2 lines) into the previous plain verse
+  const TAGMAX=2, out=[];
+  blocks.forEach((b,i)=>{
+    const ch=chorusOf(b);
+    const tag = !b.section && b.lines.length<=TAGMAX && !ch;
+    const prev = out[out.length-1];
+    if(tag && prev && !prev._chorus && !prev.section){
+      prev.lines = prev.lines.concat(b.lines); prev._src.push(i);
+    } else {
+      out.push({section:b.section, lines:b.lines.slice(), _chorus:ch, _src:[i]});
+    }
+  });
+  const normLabel=sec=>/^(CHORUS|PRE[-\s]?CHORUS|POST[-\s]?CHORUS|HOOK|REFRAIN)\s*\d+$/i.test(sec.trim())
+    ? sec.trim().replace(/\s*\d+$/,"") : sec;
+  if(out.length===1 && !out[0].section){
+    const seg=segmentFlat(out[0].lines);
+    if(seg && seg.length>1) return seg.map(b=>({section:b.section, lines:b.lines, _src:[0], _seg:true}));
+    return [{section:"",lines:out[0].lines,_src:out[0]._src}];
+  }
+  let verseN=0;
+  return out.map(b=>{
+    const base={lines:b.lines,_src:b._src};
+    if(b.section){ if(isNone(b.section)) return {section:"", ...base}; return {section:normLabel(b.section), ...base}; }
+    if(b._chorus) return {section:"CHORUS", ...base};
+    verseN++; return {section:"VERSE "+verseN, ...base};
+  });
+}
+// ---- one global lyric size for the whole setlist ----
+// Largest size in [FLOOR..MAX] at which essentially every line fits on one line.
+// Won't shrink the whole book below FLOOR just to save a rare long line (those wrap).
+function _measDoc(){ if(!window.__md) window.__md=new window.jspdf.jsPDF({unit:"pt",format:"letter"}); return window.__md; }
+function computeGlobalSize(){
+  if(_gsize!=null) return _gsize;
+  const FLOOR=14, MAX=20, doc=_measDoc();
+  const W=doc.internal.pageSize.getWidth(), maxW=W-2*50;
+  const lines=[];
+  data.forEach(s=>{ if(s.lyrics.trim()) autoSection(parseBlocks(s.lyrics)).forEach(b=>b.lines.forEach(l=>lines.push(l.toUpperCase()))); });
+  if(!lines.length){ _gsize=MAX; return _gsize; }
+  const tol=Math.max(2, Math.floor(lines.length*0.01));   // allow ~1% (min 2) of lines to wrap
+  for(let S=MAX;S>=FLOOR;S--){
+    doc.setFont("helvetica","normal").setFontSize(S);
+    let wraps=0, bad=false;
+    for(const ln of lines){ if(doc.getTextWidth(ln)>maxW){ if(++wraps>tol){bad=true;break;} } }
+    if(!bad){ _gsize=S; return _gsize; }
+  }
+  _gsize=FLOOR; return _gsize;
+}
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1800);}
+
+// ---- sidebar ----
+function renderList(){
+  const q=norm(document.getElementById("q").value);
+  const filtering=!!q;
+  const list=document.getElementById("list"); list.innerHTML="";
+  let done=0;
+  data.forEach((s,i)=>{
+    if(s.lyrics.trim())done++;
+    if(q && !norm(s.t+s.a).includes(q))return;
+    const row=document.createElement("div");
+    row.className="row"+(s.lyrics.trim()?" done":"")+(active===i?" active":"");
+    row.dataset.idx=i;
+    row.innerHTML=`${filtering?"":'<span class="grip" title="Drag to reorder">⠿</span>'}<span class="dot"></span><div class="meta"><div class="t">${esc(s.t)}</div><div class="a">${esc(s.a)}</div></div><span class="kb">${esc(s.k)} · ${s.b}</span>${filtering?"":`<span class="mv"><button title="Move up" onclick="event.stopPropagation();moveSongTo(${i},${i-1})">▲</button><button title="Move down" onclick="event.stopPropagation();moveSongTo(${i},${i+2})">▼</button></span>`}<button class="del" title="Remove song">✕</button>`;
+    row.querySelector(".meta").onclick=()=>{active=i;renderList();renderMain();};
+    row.querySelector(".dot").onclick=()=>{active=i;renderList();renderMain();};
+    row.querySelector(".del").onclick=ev=>{ ev.stopPropagation(); deleteSong(i); };
+    if(!filtering){
+      row.draggable=true;
+      row.addEventListener("dragstart",ev=>{ _dragFrom=i; setTimeout(()=>row.classList.add("dragging"),0); ev.dataTransfer.effectAllowed="move"; try{ev.dataTransfer.setData("text/plain",String(i));}catch(e){} });
+      row.addEventListener("dragend",()=>{ row.classList.remove("dragging"); hideDropline(); _dragFrom=null; });
+    }
+    list.appendChild(row);
+  });
+  const dl=document.createElement("div"); dl.className="dropline"; dl.id="dropline"; list.appendChild(dl);
+  document.getElementById("count").textContent=`${done}/${data.length} with lyrics`;
+}
+let _dragFrom=null, _dropAt=null;
+// where would the drop land? returns an insertion index (0..data.length)
+function insertIndexAt(clientY){
+  const rows=[...document.querySelectorAll("#list .row")];
+  for(const r of rows){
+    const b=r.getBoundingClientRect();
+    if(clientY < b.top + b.height/2) return +r.dataset.idx;
+  }
+  return data.length;
+}
+function showDropline(idx){
+  const line=document.getElementById("dropline"); if(!line) return;
+  const rows=[...document.querySelectorAll("#list .row")];
+  let top;
+  if(idx>=rows.length){ const last=rows[rows.length-1]; top=last?last.offsetTop+last.offsetHeight:0; }
+  else top=rows[idx].offsetTop;
+  line.style.top=(top-1)+"px"; line.classList.add("show");
+}
+function hideDropline(){ const l=document.getElementById("dropline"); if(l) l.classList.remove("show"); _dropAt=null; }
+function initListDnD(){
+  const list=document.getElementById("list");
+  list.addEventListener("dragover",ev=>{
+    if(_dragFrom===null) return;
+    ev.preventDefault(); ev.dataTransfer.dropEffect="move";
+    _dropAt=insertIndexAt(ev.clientY); showDropline(_dropAt);
+    const b=list.getBoundingClientRect();                       // auto-scroll near the edges
+    if(ev.clientY<b.top+40) list.scrollTop-=12;
+    else if(ev.clientY>b.bottom-40) list.scrollTop+=12;
+  });
+  list.addEventListener("dragleave",ev=>{ if(!list.contains(ev.relatedTarget)) hideDropline(); });
+  list.addEventListener("drop",ev=>{
+    if(_dragFrom===null) return;
+    ev.preventDefault();
+    const to=_dropAt!==null?_dropAt:insertIndexAt(ev.clientY);
+    hideDropline(); moveSongTo(_dragFrom,to); _dragFrom=null;
+  });
+}
+// insert-index semantics: idx is the slot the song lands in, before removal
+function moveSongTo(from,insertIdx){
+  if(from==null||!data[from]) return;
+  if(insertIdx<0||insertIdx>data.length) return;                // ▲ on first / ▼ on last = no-op
+  if(insertIdx===from||insertIdx===from+1) return;              // dropped where it already is
+  const cur=active!=null?data[active]:null;
+  const moving=data[from];
+  data.splice(from,1);
+  const dest=insertIdx>from?insertIdx-1:insertIdx;
+  data.splice(dest,0,moving);
+  if(cur) active=data.indexOf(cur);
+  persist(); renderList();
+}
+function sortSongsAZ(){
+  if(!data.length) return;
+  const cur=active!=null?data[active]:null;
+  data.sort((a,b)=>norm(a.t).localeCompare(norm(b.t)));
+  if(cur) active=data.indexOf(cur);
+  persist(); renderList(); toast("Sorted A–Z");
+}
+function deleteSong(i){
+  const s=data[i]; if(!s) return;
+  if(!confirm(`Remove “${s.t}” from this project?`)) return;
+  data.splice(i,1);
+  if(active===i) active = data.length ? Math.min(i,data.length-1) : null;
+  else if(active>i) active--;
+  _gsize=null; persist(); renderList(); renderMain();
+}
+function renderMain(){
+  const m=document.getElementById("main");
+  if(active===null){m.innerHTML='<div class="empty">Select a song on the left.</div>';return;}
+  const s=data[active];
+  const gl=`https://www.google.com/search?q=${encodeURIComponent(s.a+" "+s.t+" lyrics")}`;
+  m.innerHTML=`<h2>${s.t}</h2><div class="sub">${s.a} &nbsp;|&nbsp; ${s.k} &nbsp;|&nbsp; ${s.b} BPM &nbsp;&nbsp;<a class="find" target="_blank" href="${gl}">🔎 Find lyrics on Google ↗</a><button class="sbtn" onclick="exportSongPDF()">⤓ This song as PDF</button><button class="sbtn" onclick="addToBank()">★ Add to bank</button><button class="sbtn" onclick="addAllToBank()" title="Save every song in this project to the bank">★★ Add all to bank</button></div>
+    <div class="split">
+      <div class="col ed"><div class="lbl" onclick="toggleCol('ed')"><span class="chev">▾</span> Paste / edit</div>
+        <textarea id="ed" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Paste lyrics here. Blank line = new section. Start a block with Verse 1 / Chorus / [Bridge] to label it.">${s.lyrics.replace(/</g,"&lt;")}</textarea>
+      </div>
+      <div class="col pv"><div class="lbl" onclick="toggleCol('pv')"><span class="chev">▾</span> Live preview — how the page will look<button class="fsbtn" title="Fullscreen preview" onclick="event.stopPropagation();togglePreviewFS()">⛶ Fullscreen</button></div>
+        <div class="pvwrap" id="pvwrap">
+          <div class="preview" id="pv"></div>
+          <button id="pvexit" onclick="togglePreviewFS()" title="Exit fullscreen (Esc)">✕ Exit</button>
+        </div>
+      </div>
+    </div>
+    <div class="hint">Sections auto-detect: repeated parts become <kbd>CHORUS</kbd>, others <kbd>VERSE 1, 2…</kbd>. <b>Click any gray label in the preview to rename it.</b> Or type a label as a block's first line. Font auto-fits the whole setlist. Autosaves.</div>`;
+  const ed=document.getElementById("ed");
+  function sync(){
+    // auto-uppercase while keeping the caret in place
+    const a=ed.selectionStart,b=ed.selectionEnd,up=ed.value.toUpperCase();
+    if(up!==ed.value){ed.value=up;ed.setSelectionRange(a,b);}
+    data[active].lyrics=ed.value;persist();_gsize=null;renderPreview(s);
+  }
+  ed.addEventListener("input",sync);
+  ed.addEventListener("blur",renderList);
+  renderPreview(s);
+}
+function esc(t){return t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function renderPreview(s){
+  const pv=document.getElementById("pv"); if(!pv)return;
+  const gs=computeGlobalSize();
+  pv.style.setProperty("--lp", gs+"px");
+  pv.style.setProperty("--sl", Math.max(10,Math.round(gs*0.62))+"px");
+  let html=`<div class="pTitle">${esc(s.t.toUpperCase())}</div><div class="pSub">${esc(s.a.toUpperCase())} &nbsp;|&nbsp; ${esc(s.k.toUpperCase())} &nbsp;|&nbsp; ${s.b} BPM</div>`;
+  const blocks=s.lyrics.trim()?autoSection(parseBlocks(s.lyrics)):null;
+  if(!blocks){html+=`<div class="pEmpty">— LYRICS NOT YET ADDED —</div>`;}
+  else{blocks.forEach((b,bi)=>{
+    const mv = bi>0 ? `<span class="psMove"><button onclick="moveSplit(${bi},-1)" title="Move split up — pull the line above into this section">▲</button><button onclick="moveSplit(${bi},1)" title="Move split down — push this section's first line up">▼</button></span>` : "";
+    if(b.section)html+=`<div class="pSec"><span class="psLabel" title="Click to rename or remove this section" onclick="editSection(${bi})">${esc(b.section.toUpperCase())} <span class="pEdit">✎</span></span>${mv}</div>`;
+    else html+=`<div class="pSec"><span class="pAdd" title="Add a section header here" onclick="editSection(${bi})">+ section</span>${mv}</div>`;
+    for(const ln of b.lines)html+=`<div class="pLine">${esc(ln.toUpperCase())}</div>`;
+    html+=`<div class="pBlank"></div>`;
+  });}
+  pv.innerHTML=html;
+}
+// Rename a section by clicking it in the preview. Propagates the new label to every other
+// block in the song with the same (or near-same) lyrics, so all choruses rename together.
+function serializeStanzas(st){return st.map(s=>{const sec=s.section?(isNone(s.section)?"[NONE]":s.section):"";return (sec?sec+"\n":"")+s.lines.join("\n");}).join("\n\n");}
+function _lineSet(lines){return new Set(lines.map(l=>l.trim().toUpperCase()).filter(Boolean));}
+function _jaccard(a,b){let inter=0;a.forEach(x=>{if(b.has(x))inter++;});const uni=a.size+b.size-inter;return uni?inter/uni:0;}
+function editSection(idx){
+  if(active===null) return;
+  const text=data[active].lyrics;
+  const stanzas=parseBlocks(text);
+  const blocks=autoSection(parseBlocks(text));
+  const target=blocks[idx]; if(!target) return;
+  const val=prompt("Section header (e.g. CHORUS, VERSE 2, BRIDGE).\n• Leave blank to REMOVE the header\n• Type AUTO to let it auto-detect\nRenaming applies to all sections with the same lyrics.", target.section||"");
+  if(val===null) return;
+  const label=val.trim();
+  const isDel=label==="", isAuto=/^auto$/i.test(label);
+  const finalSection = isDel ? "NONE" : (isAuto ? "" : label);   // NONE = explicit no-header
+  const propagate = !isDel && !isAuto;                           // only real renames spread to matches
+  const tset=_lineSet(target.lines);
+  const isMatch=b=> b===target || (propagate && _jaccard(tset,_lineSet(b.lines))>=0.75);
+  const matches=blocks.filter(isMatch);
+  // single-block song that was auto-split: bake all sections into the text as explicit stanzas
+  if(blocks.some(b=>b._seg)){
+    const stz=blocks.map(b=>({section: isMatch(b)?finalSection:b.section, lines:b.lines}));
+    return finishSectionEdit(serializeStanzas(stz), matches, propagate);
+  }
+  const ranges=matches.map(b=>{const src=b._src||[];return {lo:Math.min(...src),hi:Math.max(...src)};})
+    .filter(r=>isFinite(r.lo)).sort((a,b)=>b.lo-a.lo);
+  let st=stanzas.slice();
+  for(const r of ranges){
+    const lines=[]; for(let k=r.lo;k<=r.hi;k++) if(st[k]) lines.push(...st[k].lines);
+    st=st.slice(0,r.lo).concat([{section:finalSection,lines}], st.slice(r.hi+1));
+  }
+  finishSectionEdit(serializeStanzas(st), matches, propagate);
+}
+function finishSectionEdit(txt, matches, propagate){
+  data[active].lyrics=txt; persist(); _gsize=null;
+  const ed=document.getElementById("ed"); if(ed) ed.value=txt;
+  renderPreview(data[active]); renderList();
+  if(propagate && matches.length>1) toast(`Renamed ${matches.length} matching sections`);
+}
+// move the boundary between section idx-1 and idx by one line (dir -1 = up, +1 = down)
+function moveSplit(idx, dir){
+  if(active===null) return;
+  const blocks=autoSection(parseBlocks(data[active].lyrics));
+  if(idx<=0 || idx>=blocks.length) return;
+  const prev=blocks[idx-1], cur=blocks[idx];
+  if(dir<0){ if(prev.lines.length<=1) return; cur.lines.unshift(prev.lines.pop()); }   // grow this section upward
+  else     { if(cur.lines.length<=1)  return; prev.lines.push(cur.lines.shift()); }     // shrink this section from the top
+  const stz=blocks.map(b=>({section:b.section, lines:b.lines}));
+  const txt=serializeStanzas(stz);
+  data[active].lyrics=txt; persist(); _gsize=null;
+  const ed=document.getElementById("ed"); if(ed) ed.value=txt;
+  renderPreview(data[active]); renderList();
+}
+
+// ---- generic setlist import: anchors on known song titles, so it reads ANY layout ----
+document.getElementById("setlist").onchange=async e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const buf=await f.arrayBuffer();
+  const styleMap=["p[style-name='Heading 1'] => h1:fresh","p[style-name='Heading 2'] => h2:fresh","p[style-name='heading 1'] => h1:fresh","p[style-name='heading 2'] => h2:fresh"];
+  const {value:md}=await mammoth.convertToMarkdown({arrayBuffer:buf},{styleMap});
+  const strip=s=>s.replace(/^#{1,6}\s*/,"").replace(/\\(.)/g,"$1").replace(/_{2,}/g,"").replace(/(^|[^*])\*([^*]+)\*/g,"$1$2").replace(/`/g,"").trim();
+  const rawLines=md.split("\n");
+  const lines=rawLines.map(strip);
+
+  // a line is a TITLE anchor if the part before any " — artist" / "[" / "|" matches a known song,
+  // AND it carries a title signal (heading, trailing artist/key meta, or multi-word) so short
+  // titles like "She"/"Higher" don't match stray lyric lines.
+  const SEP=/\s[—–-]\s|\s{2,}\[|\s\[|\s\|/;
+  const titleKey=raw=>{ let t=raw.replace(/^\d+[\.\)]\s*/,""); t=t.split(SEP)[0]; return norm(t); };
+  const known=new Map(data.map((d,i)=>[norm(d.t),i]));
+  const anchors=[];
+  lines.forEach((ln,i)=>{
+    if(!ln)return;
+    const k=titleKey(ln); if(!known.has(k))return;
+    const isHeading=/^#{1,6}\s/.test(rawLines[i]);
+    const hasMeta=SEP.test(ln);
+    const multiword=ln.replace(/^\d+[\.\)]\s*/,"").split(SEP)[0].trim().split(/\s+/).length>=2;
+    if(isHeading||hasMeta||multiword) anchors.push({line:i,si:known.get(k)});
+  });
+
+  // meta/legend lines to ignore inside a body
+  const isMeta=s=>(/\|\s*\d+\s*BPM/i.test(s)) || (/BACKING VOCAL/i.test(s)&&/LEAD/i.test(s)) || /^[A-Z\s]*=\s*(BACKING|LEAD)/i.test(s);
+
+  // for each anchor, body = lines until the next anchor; keep the LARGEST body per song
+  // (handles a setlist index at the top whose entries have little/no body)
+  const best={};
+  anchors.forEach((a,idx)=>{
+    const end=idx+1<anchors.length?anchors[idx+1].line:lines.length;
+    const body=[];
+    for(let j=a.line+1;j<end;j++){const s=lines[j]; if(s===undefined)continue; if(!s.trim()){body.push("");continue;} if(isMeta(s))continue; body.push(s);}
+    // trim leading/trailing blanks
+    while(body.length&&!body[0].trim())body.shift();
+    while(body.length&&!body[body.length-1].trim())body.pop();
+    const real=body.filter(x=>x.trim()).length;
+    if(real>=2 && real>(best[a.si]?.real||0)) best[a.si]={text:body.join("\n"),real};
+  });
+
+  let n=0;
+  for(const si in best){ data[si].lyrics=best[si].text; n++; }
+  _gsize=null; persist(); renderList(); if(active!==null)renderMain();
+  toast(n?`Imported ${n} song${n>1?"s":""} from the setlist`:"No matching songs found in that file");
+};
+
+// ---- project bar wiring ----
+document.getElementById("projsel").onchange=e=>loadProject(e.target.value);
+document.getElementById("toglist").onclick=()=>document.getElementById("wrap").classList.toggle("side-off");
+document.getElementById("newproj").onclick=newProject;
+document.getElementById("addsongs").onclick=addSongsFlow;
+const savebtn=document.getElementById("savebtn");
+savebtn.onclick=()=>{ persist(); const o="Save"; savebtn.textContent="Saved ✓"; setTimeout(()=>savebtn.textContent=o,1100); };
+document.getElementById("bankbtn").onclick=openBank;
+document.getElementById("modalbank").onclick=()=>{ closeModal(); openBank(); };
+const menubtn=document.getElementById("menubtn"), menupop=document.getElementById("menupop");
+menubtn.onclick=e=>{ e.stopPropagation(); menupop.classList.toggle("show"); };
+document.addEventListener("click",()=>menupop.classList.remove("show"));
+menupop.onclick=e=>{ const act=e.target.getAttribute("data-act"); if(!act)return; menupop.classList.remove("show");
+  if(act==="rename")renameProject();
+  else if(act==="sort")sortSongsAZ();
+  else if(act==="duplicate")duplicateProject();
+  else if(act==="setlistpdf")openSetlist();
+  else if(act==="setlistcsv")exportSetlistCSV();
+  else if(act==="export")exportProject();
+  else if(act==="import")document.getElementById("importproj").click();
+  else if(act==="delete")deleteProject();
+};
+document.getElementById("importproj").onchange=e=>{ const f=e.target.files[0]; if(f)importProjectFile(f); e.target.value=""; };
+document.getElementById("modalok").onclick=()=>{ const ta=document.getElementById("modalta"); const pasteOn=!ta.classList.contains("hidden"); const songs = pasteOn ? parseSetlist(ta.value) : sgCollect(); const cb=_modalCb; closeModal(); if(cb)cb(songs); };
+document.getElementById("modalcancel").onclick=closeModal;
+document.getElementById("sgaddrow").onclick=()=>{ const r=sgAddRow(); r.querySelector(".sg-t").focus(); };
+document.getElementById("sgrows").addEventListener("input",e=>{ if(e.target.classList.contains("sg-t")) sgEnsureTrailingRow(); });
+document.getElementById("modalpaste").onclick=()=>{
+  const ta=document.getElementById("modalta"), grid=document.getElementById("gridmode"), btn=document.getElementById("modalpaste");
+  if(ta.classList.contains("hidden")){ // grid -> paste
+    const songs=sgCollect();
+    ta.value=songs.map(s=>[s.t,s.a,s.k,s.b].filter(x=>x!=="").join(" | ")).join("\n");
+    grid.classList.add("hidden"); ta.classList.remove("hidden"); btn.textContent="Use columns"; ta.focus();
+  }else{ // paste -> grid
+    sgFill(parseSetlist(ta.value));
+    ta.classList.add("hidden"); grid.classList.remove("hidden"); btn.textContent="Paste a list";
+  }
+};
+document.getElementById("bankcancel").onclick=closeBank;
+document.getElementById("bankadd").onclick=bankAddSelected;
+document.getElementById("modalcsv").onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const songs=songsFromCSV(await f.text());
+    const ta=document.getElementById("modalta");
+    if(ta.classList.contains("hidden")) sgFill(songs);
+    else ta.value=songs.map(s=>[s.t,s.a,s.k,s.b].filter(x=>x!=="").join(" | ")).join("\n");
+    toast(songs.length?`Found ${songs.length} songs — review, then Add`:"No song rows found in that CSV");
+  }catch(err){ toast("Couldn't read that CSV"); }
+  e.target.value="";
+};
+document.getElementById("bankq").oninput=filterBank;
+document.getElementById("banklist").addEventListener("change",e=>{ if(e.target.type==="checkbox") updateBankFoot(); });
+document.getElementById("modaldocx").onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const buf=await f.arrayBuffer();
+    const {value:md}=await mammoth.convertToMarkdown({arrayBuffer:buf});
+    const songs=parseSetlist(md);
+    const ta=document.getElementById("modalta");
+    if(ta.classList.contains("hidden")) sgFill(songs);
+    else ta.value=songs.map(s=>[s.t,s.a,s.k,s.b].filter(x=>x!=="").join(" | ")).join("\n");
+    toast(songs.length?`Found ${songs.length} songs — review, then Add`:"No song rows found in that .docx");
+  }catch(err){ toast("Couldn't read that .docx"); }
+  e.target.value="";
+};
+
+// ---- PDF generation ----
+function buildPDF(opts){
+  opts=opts||{};
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:"pt",format:"letter"});
+  const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), M=50;
+  const LP=computeGlobalSize();                 // one size for the whole setlist
+  const LH=Math.round(LP*1.45), SL=Math.max(10,Math.round(LP*0.62));
+  const LBEF=Math.round(LP*0.4), LAFT=Math.round(LP*1.35);   // gaps around section labels
+  const songs=opts.songs?[...opts.songs]:[...data];   // project order drives body + TOC
+  const withTOC = opts.toc!==false && songs.length>1;
+
+  let y=M+6;
+  if(withTOC){
+    doc.setFont("helvetica","bold").setFontSize(22).text((BAND||"").toUpperCase(),W/2,y,{align:"center"});y+=20;
+    doc.setFont("helvetica","bold").setFontSize(11).setTextColor(120).text(`MASTER LYRICS  •  ${songs.length} SONGS`,W/2,y,{align:"center"});y+=16;
+    doc.setDrawColor(150).line(M,y,W-M,y);y+=18; doc.setTextColor(0);
+    doc.setFontSize(10);
+    songs.forEach((s,i)=>{
+      if(y>H-40){doc.addPage();y=M;}
+      doc.setFont("helvetica","bold").setTextColor(40);
+      doc.text(`${i+1}. ${s.t}`,M,y);
+      doc.setFont("helvetica","normal").setTextColor(110);
+      doc.text(`${s.a}`,W*0.55,y);
+      doc.text(`${s.k}`,W-M,y,{align:"right"});
+      y+=15;
+    });
+    doc.setTextColor(0);
+  }
+
+  // ---- songs ----
+  songs.forEach((s,si)=>{
+    if(withTOC || si>0) doc.addPage();        // single song uses page 1; otherwise each gets a page
+    const pg=doc.getCurrentPageInfo().pageNumber;
+    doc.outline.add(null,s.t.toUpperCase(),{pageNumber:pg});
+    let y=M+10;
+    doc.setFont("helvetica","bold").setFontSize(20).setTextColor(0).text(s.t.toUpperCase(),W/2,y,{align:"center"});y+=20;
+    doc.setFont("helvetica","bold").setFontSize(11).setTextColor(85).text(`${s.a}   |   ${s.k}   |   ${s.b} BPM`,W/2,y,{align:"center"});y+=8;
+    doc.setDrawColor(205).line(M,y,W-M,y);y+=20;doc.setTextColor(0);
+    const blocks = s.lyrics.trim()?autoSection(parseBlocks(s.lyrics)):null;
+    const cont=()=>{doc.setFont("helvetica","normal").setFontSize(8.5).setTextColor(140).text(`--- ${s.t.toUpperCase()}  //  CONTINUED ---`,W/2,H-30,{align:"center"});doc.setTextColor(0).setFont("helvetica","normal").setFontSize(LP);};
+    if(!blocks){
+      doc.setFont("helvetica","bold").setFontSize(13).setTextColor(170,40,40).text("— LYRICS NOT YET ADDED —",W/2,y+40,{align:"center"});doc.setTextColor(0);
+      return;
+    }
+    for(const b of blocks){
+      // keep a section intact: if the whole block (label + lines) fits on a page but not in
+      // the space left here, start it on the next page. (Blocks taller than a page still flow.)
+      doc.setFont("helvetica","normal").setFontSize(LP);
+      let wl=0; for(const ln of b.lines) wl+=doc.splitTextToSize(ln.toUpperCase(),W-2*M).length;
+      const need=(b.section?LBEF+LAFT:0)+wl*LH;
+      if(y>M && y+need>H-50 && need<=(H-50)-M){ doc.addPage(); y=M; }
+      if(b.section){ y+=LBEF; if(y>H-60){doc.addPage();y=M;cont();}
+        doc.setFont("helvetica","normal").setFontSize(SL).setTextColor(136).text(b.section.toUpperCase(),W/2,y,{align:"center"});y+=LAFT;doc.setTextColor(0);}
+      doc.setFont("helvetica","normal").setFontSize(LP);
+      for(const ln of b.lines){
+        for(const w of doc.splitTextToSize(ln.toUpperCase(),W-2*M)){
+          if(y>H-55){doc.addPage();y=M;cont();}
+          doc.text(w,W/2,y,{align:"center"});y+=LH;
+        }
+      }
+      y+=9;
+    }
+  });
+  return doc;
+}
+document.getElementById("gen").onclick=savePDF;
+function savePDF(){ buildPDF().save((BAND.replace(/[^A-Za-z0-9]+/g,"_")||"Lyrics")+"_Master_Lyrics.pdf"); toast("PDF saved — AirDrop it to ForScore"); }
+let _pdfURL=null;
+function openPDFPreview(){
+  try{
+    if(_pdfURL){ URL.revokeObjectURL(_pdfURL); _pdfURL=null; }
+    _pdfURL=buildPDF().output("bloburl");
+    document.getElementById("pdfframe").src=_pdfURL;
+    document.getElementById("pdfsub").textContent=(BAND||"")+" — "+data.length+" songs";
+    document.getElementById("pdfoverlay").classList.add("show");
+  }catch(e){ toast("Couldn't build the preview"); }
+}
+function closePDFPreview(){
+  document.getElementById("pdfoverlay").classList.remove("show");
+  document.getElementById("pdfframe").src="about:blank";
+  if(_pdfURL){ URL.revokeObjectURL(_pdfURL); _pdfURL=null; }
+}
+document.getElementById("preview").onclick=openPDFPreview;
+document.getElementById("pdfclose").onclick=closePDFPreview;
+document.getElementById("pdfdl").onclick=savePDF;
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && document.getElementById("pdfoverlay").classList.contains("show")) closePDFPreview(); });
+
+document.getElementById("q").oninput=renderList;
+function init(){
+  document.getElementById("build").textContent="build "+BUILD;
+  initListDnD();
+  initSetlistUI();
+  initHomeUI();
+  migrateIfNeeded();
+  let cid=Store.current();
+  if(!cid || !Store.get(cid)){ const ix=Store.index(); cid=ix.length?ix[0].id:null; }
+  if(cid) loadProject(cid); else renderProjectBar();
+  openHome();
+}
+init();
+</script>
+</body>
+</html>
