@@ -79,54 +79,47 @@
   #pdfoverlay .pdfsub{color:var(--muted);font-size:12px}
   #pdfoverlay iframe{flex:1;width:100%;border:none;background:#333}
   #home{display:none;position:fixed;inset:0;z-index:9999;background:
-      radial-gradient(1100px 620px at 78% -8%, rgba(224,179,65,.10), transparent 60%),
-      radial-gradient(760px 520px at 8% 108%, rgba(91,141,239,.07), transparent 62%),
+      radial-gradient(900px 520px at 82% -10%, rgba(224,179,65,.08), transparent 58%),
       var(--bg);
     overflow:auto;
-    padding:calc(env(safe-area-inset-top) + 40px) calc(env(safe-area-inset-right) + 30px)
-            calc(env(safe-area-inset-bottom) + 40px) calc(env(safe-area-inset-left) + 30px)}
+    padding:calc(env(safe-area-inset-top) + 48px) calc(env(safe-area-inset-right) + 34px)
+            calc(env(safe-area-inset-bottom) + 44px) calc(env(safe-area-inset-left) + 34px)}
   #home.show{display:block}
-  .homebox{width:min(1180px,100%);margin:0 auto;display:grid;gap:30px;align-content:start}
-  .homehero{display:flex;flex-direction:column;gap:14px}
-  .homehd{font-size:clamp(34px,5.4vw,56px);font-weight:800;letter-spacing:-1.4px;line-height:.98}
+  .homebox{width:min(1040px,100%);margin:0 auto;display:grid;gap:34px;align-content:start}
+  .homehero{display:flex;flex-direction:column;gap:18px}
+  .homehd{font-size:clamp(34px,5vw,52px);font-weight:800;letter-spacing:-1.6px;line-height:.96}
   .homehd em{font-style:normal;color:var(--accent)}
-  .homesub{color:var(--muted);font-size:15px;line-height:1.5;max-width:34ch}
-  .homerule{height:2px;background:linear-gradient(90deg,var(--accent),rgba(224,179,65,0));border-radius:2px;width:88px}
-  .homesec{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:2px}
-  .homesec::after{content:"";flex:1;height:1px;background:var(--line)}
-  #homelist{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));margin-bottom:22px}
-  .hrow{display:flex;flex-direction:column;gap:12px;padding:18px;border:1px solid var(--line);border-radius:14px;
-    background:linear-gradient(180deg,var(--panel),rgba(23,26,33,.55));cursor:pointer;position:relative;
-    transition:border-color .14s,transform .14s}
-  .hrow:hover{border-color:rgba(224,179,65,.55);transform:translateY(-2px)}
-  .hrow.iscur{border-color:rgba(224,179,65,.4)}
-  .hrow .htop{display:flex;align-items:center;gap:12px}
-  .hrow .hb{font-weight:800;font-size:19px;letter-spacing:.6px;text-transform:uppercase;flex:1;min-width:0;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .hrow .hs{color:var(--muted);font-size:12.5px;letter-spacing:.2px}
+  .homerule{height:3px;width:56px;background:var(--accent);border-radius:3px}
+  .homesub{color:var(--muted);font-size:15px;line-height:1.55;max-width:36ch}
+  .homesec{font-size:11px;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted);margin-bottom:2px}
+  #homelist{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));margin-bottom:26px}
+  .hrow{display:block;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel);
+    cursor:pointer;position:relative;transition:border-color .14s,background .14s}
+  .hrow:hover{border-color:rgba(224,179,65,.5);background:var(--panel2)}
+  .hrow.iscur{border-color:rgba(224,179,65,.35)}
+  .hrow .hcur{display:inline-block;font-size:9px;color:var(--accent);border:1px solid rgba(224,179,65,.45);
+    border-radius:20px;padding:2px 9px;letter-spacing:1.2px;margin-bottom:11px}
+  .hrow .hb{font-weight:800;font-size:21px;letter-spacing:.4px;text-transform:uppercase;line-height:1.1;
+    padding-right:34px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hrow .hx{position:absolute;top:15px;right:14px;border:none;background:transparent;color:var(--muted);
+    cursor:pointer;font-size:15px;opacity:0;width:32px;height:32px;border-radius:9px}
+  .hrow:hover .hx{opacity:.5}
+  .hrow .hx:hover{color:var(--red);opacity:1;background:rgba(224,100,75,.12)}
+  .hrow .hbar{height:5px;border-radius:5px;background:var(--line);overflow:hidden;margin:15px 0 10px}
+  .hrow .hbar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),rgba(224,179,65,.7));border-radius:5px}
+  .hrow .hs{color:var(--muted);font-size:12.5px;letter-spacing:.2px;display:flex;gap:6px;flex-wrap:wrap}
   .hrow .hs b{color:var(--text);font-weight:600}
-  .hrow .hcur{font-size:9px;color:var(--accent);border:1px solid rgba(224,179,65,.5);border-radius:20px;
-    padding:3px 9px;letter-spacing:1px;flex:0 0 auto}
-  .hrow .hx{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:15px;opacity:0;
-    flex:0 0 auto;width:34px;height:34px;border-radius:9px}
-  .hrow:hover .hx{opacity:.55}
-  .hrow .hx:hover{color:var(--red);opacity:1;background:rgba(224,100,75,.1)}
-  /* one tick per song — lit when that song has lyrics. the book's progress, at a glance */
-  .ticks{display:flex;gap:2px;align-items:flex-end;height:16px}
-  .ticks i{flex:1;min-width:1px;height:7px;border-radius:1px;background:var(--line)}
-  .ticks i.on{height:16px;background:linear-gradient(180deg,var(--accent),rgba(224,179,65,.55))}
-  .tickbar{height:7px;border-radius:4px;background:var(--line);overflow:hidden}
-  .tickbar i{display:block;height:100%;background:var(--accent)}
-  .homeempty{color:var(--muted);border:1px dashed var(--line);border-radius:14px;padding:34px;text-align:center;line-height:1.6}
+  .hrow .hs .dotsep{opacity:.4}
+  .homeempty{color:var(--muted);border:1px dashed var(--line);border-radius:16px;padding:38px;text-align:center;line-height:1.7}
   .homebtns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .homebtns .primary,.homebtns .ghost,.homebtns .pill{min-height:44px}
-  .homefoot{color:var(--muted);font-size:12px;margin-top:24px;border-top:1px solid var(--line);padding-top:14px;line-height:1.6}
-  @media (min-width:920px){
-    .homebox{grid-template-columns:330px 1fr;gap:44px;align-items:start}
-    .homehero{position:sticky;top:0}
+  .homefoot{color:var(--muted);font-size:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:16px;line-height:1.6}
+  @media (min-width:900px){
+    .homebox{grid-template-columns:300px 1fr;gap:56px;align-items:start}
+    .homehero{position:sticky;top:8px}
   }
-  @media (max-width:919px){ .homehd{font-size:clamp(30px,7vw,44px)} }
-  @media (prefers-reduced-motion:reduce){ .hrow{transition:none} .hrow:hover{transform:none} }
+  @media (max-width:899px){ .homehd{font-size:clamp(30px,7vw,42px)} }
+  @media (prefers-reduced-motion:reduce){ .hrow{transition:none} }
   /* ---- touch / iPad ---- */
   .row .mv,.slrow .mv{display:none}
   @media (hover:none){
@@ -168,6 +161,8 @@
   .slrow .slgrip{position:absolute;left:8px;top:50%;transform:translateY(-50%);opacity:0;color:#999;font-size:12px;cursor:grab}
   .slrow:hover .slgrip{opacity:.6}
   .slsong{font-weight:700;letter-spacing:.3px;line-height:1.3}
+  .slsong .slar{display:block;font-weight:400;color:#666;letter-spacing:.6px;line-height:1.25;margin-top:1px}
+  .ghost.on{border-color:var(--accent);color:var(--accent)}
   .slset{font-weight:800;letter-spacing:2px;color:#111;border-top:2px solid #111;border-bottom:2px solid #111;margin:14px 8px 8px;padding:5px 6px}
   .slrule{padding:0 6px}
   .slrule i{display:block;border-top:2px dashed #999;margin:9px 0}
@@ -335,12 +330,14 @@
     <span class="pdfsub" id="slsub"></span>
     <span style="flex:1"></span>
     <label class="slsizewrap" title="Font size">A<input type="range" id="slsize" min="12" max="120" step="1"><span id="slsizeval"></span></label>
+    <button class="ghost" id="slartist" title="Show or hide the artist under each song">Artist</button>
     <button class="ghost" id="slfit" title="Size it to fill one page">Fit page</button>
     <button class="ghost" id="slfitw" title="Biggest size where the longest title still fits on one line">Fit title</button>
     <button class="ghost" id="sladdset" title="Insert a SET header after the selected row">+ Set break</button>
     <button class="ghost" id="sladdrule" title="Insert a divider line after the selected row">+ Line</button>
     <button class="ghost" id="slreset" title="Rebuild from the current song list">Reset</button>
     <button class="ghost" id="slpdf">⤓ PDF</button>
+    <button class="ghost" id="sltxt" title="Export the setlist as a plain text file">⤓ TXT</button>
     <button class="ghost" id="slclose">✕ Close</button>
   </div>
   <div class="slscroll"><div class="slsheet" id="slsheet"></div></div>
@@ -371,7 +368,7 @@
 <script>
 const SEED_META = [{"t": "Ain't Nobody", "a": "Chaka Khan", "k": "Eb minor", "b": 104}, {"t": "All I Wanted", "a": "Paramore", "k": "F#", "b": 144}, {"t": "All The Small Things", "a": "Blink-182", "k": "C", "b": 149}, {"t": "Another One Bites The Dust", "a": "Queen", "k": "F minor", "b": 112}, {"t": "At Last", "a": "Etta James", "k": "F", "b": 87}, {"t": "Barracuda", "a": "Heart", "k": "E", "b": 137}, {"t": "Black Hole Sun", "a": "Soundgarden", "k": "A minor", "b": 117}, {"t": "Build Me Up Buttercup", "a": "The Foundations", "k": "C", "b": 134}, {"t": "Car Wash", "a": "Rose Royce", "k": "C minor", "b": 183}, {"t": "Closer", "a": "Ne-Yo", "k": "E minor", "b": 126}, {"t": "Crazy", "a": "Gnarls Barkley", "k": "G#", "b": 112}, {"t": "Creep", "a": "Radiohead", "k": "C", "b": 90}, {"t": "Cruisin'", "a": "Smokey Robinson", "k": "Ab", "b": 85}, {"t": "Don't Stop Me Now", "a": "Queen", "k": "G", "b": 159}, {"t": "Dream On", "a": "Aerosmith", "k": "F minor", "b": 74}, {"t": "Fuck You", "a": "CeeLo Green", "k": "C", "b": 127}, {"t": "Give A Little Bit", "a": "Supertramp", "k": "D", "b": 91}, {"t": "Go Your Own Way", "a": "Fleetwood Mac", "k": "G", "b": 136}, {"t": "Hard To Handle", "a": "Otis Redding", "k": "Bb", "b": 96}, {"t": "Heartbreaker", "a": "Pat Benatar", "k": "C#", "b": 156}, {"t": "Hella Good", "a": "No Doubt", "k": "G#", "b": 117}, {"t": "Higher", "a": "Creed", "k": "D", "b": 155}, {"t": "Higher And Higher", "a": "Jackie Wilson", "k": "D", "b": 96}, {"t": "Higher Ground", "a": "Stevie Wonder", "k": "C# minor", "b": 125}, {"t": "Highway To Hell", "a": "AC/DC", "k": "F# Minor", "b": 116}, {"t": "Holy Diver", "a": "Dio", "k": "C minor", "b": 93}, {"t": "Hot N Cold", "a": "Katy Perry", "k": "G", "b": 130}, {"t": "I Believe In A Thing Called Love", "a": "The Darkness", "k": "E", "b": 128}, {"t": "I Can See Clearly Now", "a": "Johnny Nash", "k": "D", "b": 123}, {"t": "I Heard It Through The Grapevine", "a": "Marvin Gaye", "k": "G#", "b": 117}, {"t": "I Put A Spell On You", "a": "Joss Stone & Jeff Beck", "k": "F# minor", "b": 58}, {"t": "I Want It That Way", "a": "Backstreet Boys", "k": "F# minor", "b": 99}, {"t": "I Want You Back", "a": "Jackson 5", "k": "Ab", "b": 98}, {"t": "I Want You To Want Me", "a": "Cheap Trick", "k": "D", "b": 206}, {"t": "I'm The Only One", "a": "Melissa Etheridge", "k": "C", "b": 85}, {"t": "I'm Your Baby Tonight", "a": "Whitney Houston", "k": "F#", "b": 165}, {"t": "I2I (Goofy Movie)", "a": "Tevin Campbell", "k": "A", "b": 128}, {"t": "If It Makes You Happy", "a": "Sheryl Crow", "k": "G", "b": 95}, {"t": "Immigrant Song", "a": "Led Zeppelin", "k": "F# minor", "b": 112}, {"t": "Kickstart My Heart", "a": "Mötley Crüe", "k": "G minor", "b": 178}, {"t": "Kiss", "a": "Prince", "k": "A", "b": 112}, {"t": "Kiss Me", "a": "Sixpence None The Richer", "k": "Eb", "b": 100}, {"t": "Knock On Wood", "a": "Eddie Floyd", "k": "E", "b": 125}, {"t": "Lady Marmalade", "a": "Patti LaBelle", "k": "D minor", "b": 118}, {"t": "Livin' La Vida Loca", "a": "Ricky Martin", "k": "C# minor", "b": 178}, {"t": "Livin' On A Prayer", "a": "Bon Jovi", "k": "E minor", "b": 122}, {"t": "Lola", "a": "The Kinks", "k": "E", "b": 152}, {"t": "Love On Top", "a": "Beyoncé", "k": "C", "b": 100}, {"t": "Lovefool", "a": "The Cardigans", "k": "A", "b": 112}, {"t": "Man! I Feel Like A Woman!", "a": "Shania Twain", "k": "Bb", "b": 123}, {"t": "Midnight Train To Georgia", "a": "Gladys Knight & The Pips", "k": "A# minor", "b": 90}, {"t": "My Own Worst Enemy", "a": "Lit", "k": "E", "b": 104}, {"t": "Natural Woman", "a": "Aretha Franklin", "k": "C", "b": 112}, {"t": "Never Too Much", "a": "Luther Vandross", "k": "D", "b": 110}, {"t": "Objection (Tango)", "a": "Shakira", "k": "B minor", "b": 89}, {"t": "On The Radio", "a": "Donna Summer", "k": "E minor", "b": 127}, {"t": "Paint It, Black", "a": "The Rolling Stones", "k": "D minor", "b": 159}, {"t": "Paranoid", "a": "Black Sabbath", "k": "E minor", "b": 163}, {"t": "Photograph", "a": "Nickelback", "k": "Eb", "b": 73}, {"t": "Pour Some Sugar On Me", "a": "Def Leppard", "k": "C# minor", "b": 85}, {"t": "Respect", "a": "Aretha Franklin", "k": "C", "b": 115}, {"t": "River Deep, Mountain High", "a": "Tina Turner", "k": "Eb", "b": 155}, {"t": "Rock With You", "a": "Michael Jackson", "k": "Eb minor", "b": 114}, {"t": "Ruby Soho", "a": "Rancid", "k": "G", "b": 162}, {"t": "Santeria", "a": "Sublime", "k": "C# minor", "b": 91}, {"t": "Separate Ways", "a": "Journey", "k": "B minor", "b": 82}, {"t": "She", "a": "Green Day", "k": "C# minor", "b": 190}, {"t": "Shine", "a": "Collective Soul", "k": "D", "b": 75}, {"t": "Shining Star", "a": "Earth, Wind & Fire", "k": "E minor", "b": 100}, {"t": "Simple Man", "a": "Lynyrd Skynyrd", "k": "C", "b": 120}, {"t": "Since U Been Gone", "a": "Kelly Clarkson", "k": "G", "b": 132}, {"t": "Sk8er Boi", "a": "Avril Lavigne", "k": "D", "b": 150}, {"t": "Somebody Told Me", "a": "The Killers", "k": "Bb", "b": 138}, {"t": "Spooky", "a": "Dusty Springfield", "k": "E minor", "b": 106}, {"t": "Still Of The Night", "a": "Whitesnake", "k": "E", "b": 100}, {"t": "Sugar, We're Goin Down", "a": "Fall Out Boy", "k": "G", "b": 162}, {"t": "Sweet Child O' Mine", "a": "Guns N' Roses", "k": "D", "b": 127}, {"t": "Take It On The Run", "a": "REO Speedwagon", "k": "G", "b": 78}, {"t": "Tears Of A Clown", "a": "Smokey Robinson", "k": "C#", "b": 128}, {"t": "The Kids Aren't Alright", "a": "The Offspring", "k": "Bb minor", "b": 100}, {"t": "The Reason", "a": "Hoobastank", "k": "B", "b": 159}, {"t": "The Trooper", "a": "Iron Maiden", "k": "E minor", "b": 160}, {"t": "Them Changes", "a": "Thundercat", "k": "E minor", "b": 81}, {"t": "This Love", "a": "Maroon 5", "k": "C minor", "b": 95}, {"t": "Toxic", "a": "Britney Spears", "k": "C minor", "b": 143}, {"t": "Umbrella", "a": "Rihanna", "k": "C# minor", "b": 87}, {"t": "Unwritten", "a": "Natasha Bedingfield", "k": "F", "b": 100}, {"t": "What I Like About You", "a": "The Romantics", "k": "A", "b": 160}, {"t": "When It's Over", "a": "Sugar Ray", "k": "G", "b": 100}, {"t": "Yeah!", "a": "Usher", "k": "G minor", "b": 105}, {"t": "You Oughta Know", "a": "Alanis Morissette", "k": "E", "b": 105}, {"t": "Your Love", "a": "The Outfield", "k": "C#", "b": 160}];
 const SEED_BAND = "THE UNTRUSTABLES";
-const BUILD = "2026.07.17g";               // bump on each ship; shown in the corner
+const BUILD = "2026.07.17j";               // bump on each ship; shown in the corner
 const OLD_KEY = "lyrics_the_untrustables_v1";                 // pre-multiproject autosave key (one-time migration)
 const uid = () => "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
@@ -627,9 +624,17 @@ function addAllToBank(){
 let _slSel=null, _slFrom=null, _slAt=null;
 function slItems(){
   if(!project) return [];
-  if(!Array.isArray(project.setlist) || !project.setlist.length) project.setlist=data.map(s=>({k:"song",t:s.t}));
+  if(!Array.isArray(project.setlist) || !project.setlist.length) project.setlist=data.map(s=>({k:"song",t:s.t,a:s.a||""}));
+  // setlists saved before artists were tracked: fill them in from the song list by title
+  project.setlist.forEach(it=>{
+    if(it.k==="song" && it.a===undefined){
+      const m=data.find(s=>norm(s.t)===norm(it.t));
+      it.a = m ? (m.a||"") : "";
+    }
+  });
   return project.setlist;
 }
+function slShowArtist(){ return !!(project && project.slArtist); }
 function slSize(){ return (project && project.slsize) || 26; }
 function slSetSize(px){ if(!project) return; project.slsize=px; persist();
   document.getElementById("slsizeval").textContent=px;
@@ -639,6 +644,8 @@ function renderSetlist(){
   const size=slSize();
   if(!items.length){ sheet.innerHTML='<div class="slempty">Setlist is empty — hit Reset to rebuild it from your song list.</div>'; return; }
   let setN=0;
+  const showA=slShowArtist();
+  const ab=document.getElementById("slartist"); if(ab) ab.classList.toggle("on",showA);
   let html=`<div class="slband" style="font-size:${Math.max(11,Math.round(size*.5))}px">${esc(BAND.toUpperCase())}</div>`;
   items.forEach((it,i)=>{
     const sel=_slSel===i?" sel":"";
@@ -649,7 +656,7 @@ function renderSetlist(){
     } else if(it.k==="rule"){
       html+=`<div class="slrow slrule${sel}" data-i="${i}" draggable="true">${ctl}<i></i></div>`;
     } else {
-      html+=`<div class="slrow slsong${sel}" data-i="${i}" draggable="true" style="font-size:${size}px">${ctl}<span class="sltx">${esc(it.t.toUpperCase())}</span></div>`;
+      html+=`<div class="slrow slsong${sel}" data-i="${i}" draggable="true" style="font-size:${size}px">${ctl}<span class="sltx">${esc(it.t.toUpperCase())}</span>${(showA&&it.a)?`<span class="slar" style="font-size:${Math.round(size*.44)}px">${esc(it.a.toUpperCase())}</span>`:""}</div>`;
     }
   });
   html+=`<div class="sldrop" id="sldrop"></div>`;
@@ -673,7 +680,7 @@ function slAdd(kind){
 function slDelete(i){ const items=slItems(); items.splice(i,1); if(_slSel===i)_slSel=null; else if(_slSel>i)_slSel--; persist(); renderSetlist(); }
 function slReset(){
   if(!confirm("Rebuild the setlist from the current song list?\n\nSet breaks and divider lines will be removed.")) return;
-  project.setlist=data.map(s=>({k:"song",t:s.t})); _slSel=null; persist(); renderSetlist(); toast("Setlist rebuilt from song list");
+  project.setlist=data.map(s=>({k:"song",t:s.t,a:s.a||""})); _slSel=null; persist(); renderSetlist(); toast("Setlist rebuilt from song list");
 }
 function slHideDrop(){ const d=document.getElementById("sldrop"); if(d) d.classList.remove("show"); _slAt=null; }
 function slInsertIndexAt(clientY){
@@ -745,9 +752,11 @@ function slFitTitle(){
 }
 function slFit(){
   const items=slItems(); if(!items.length) return;
+  const showA=slShowArtist();
   const H=792, M=46, avail=H-M*2-30;                       // letter page minus margins and band header
   for(let px=60;px>=12;px--){
-    const h=items.reduce((a,it)=> a + (it.k==="song"?px*1.34 : it.k==="set"?px*1.25 : px*.5), 0);
+    const h=items.reduce((a,it)=> a + (it.k==="song" ? px*1.34 + ((showA&&it.a)?Math.round(px*.44)*.95:0)
+                                        : it.k==="set" ? px*1.25 : px*.5), 0);
     if(h<=avail){ slSetSize(px); toast("Sized to fit one page ("+px+")"); return; }
   }
   slSetSize(12); toast("Setlist is long — even 12 needs more than one page");
@@ -757,6 +766,7 @@ function slExportPDF(){
   const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:"pt",format:"letter"});
   const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), M=46;
   const size=slSize(); let y=0, setN=0;
+  const showA=slShowArtist();
   const head=()=>{ y=M+14; doc.setFont("helvetica","bold").setFontSize(Math.max(9,Math.round(size*.5))).setTextColor(90)
       .text(BAND.toUpperCase(),W/2,y,{align:"center"}); y+=Math.round(size*.9); };
   head();
@@ -779,9 +789,30 @@ function slExportPDF(){
     doc.setFont("helvetica","bold").setFontSize(size).setTextColor(0);
     const lines=doc.splitTextToSize(it.t.toUpperCase(),W-M*2-20);
     lines.forEach(ln=>{ if(y>H-M){ doc.addPage(); head(); } doc.text(ln,W/2,y,{align:"center"}); y+=size*1.34; });
+    if(showA && it.a){
+      const afs=Math.round(size*.44);
+      if(y-size*.34>H-M){ doc.addPage(); head(); }
+      doc.setFont("helvetica","normal").setFontSize(afs).setTextColor(110)
+         .text(it.a.toUpperCase(),W/2,y-size*.42,{align:"center"});
+      y+=afs*.95;
+    }
   });
   doc.save(projSlug()+"_Setlist.pdf");
   toast("Setlist PDF saved");
+}
+function slExportTXT(){
+  const items=slItems(); if(!items.length){ toast("Setlist is empty"); return; }
+  const showA=slShowArtist();
+  const lines=[BAND.toUpperCase(),""];
+  let setN=0, num=0;
+  items.forEach(it=>{
+    if(it.k==="rule"){ lines.push("———"); return; }
+    if(it.k==="set"){ setN++; num=0; lines.push("", it.label?it.label.toUpperCase():("SET "+setN), ""); return; }
+    num++;
+    lines.push(`${num}. ${it.t.toUpperCase()}${(showA&&it.a)?"  —  "+it.a.toUpperCase():""}`);
+  });
+  dlFile(lines.join("\n")+"\n", projSlug()+"_Setlist.txt","text/plain;charset=utf-8");
+  toast("Setlist TXT exported");
 }
 function openSetlist(){
   if(!project){ toast("Open or create a project first"); return; }
@@ -800,9 +831,11 @@ function initSetlistUI(){
   document.getElementById("sladdset").onclick=()=>slAdd("set");
   document.getElementById("sladdrule").onclick=()=>slAdd("rule");
   document.getElementById("slreset").onclick=slReset;
+  document.getElementById("slartist").onclick=()=>{ if(!project) return; project.slArtist=!project.slArtist; persist(); renderSetlist(); };
   document.getElementById("slfit").onclick=slFit;
   document.getElementById("slfitw").onclick=slFitTitle;
   document.getElementById("slpdf").onclick=slExportPDF;
+  document.getElementById("sltxt").onclick=slExportTXT;
   document.getElementById("slsize").oninput=e=>slSetSize(+e.target.value);
   document.addEventListener("keydown",e=>{ if(e.key==="Escape" && document.getElementById("slview").classList.contains("show")) closeSetlist(); });
 }
@@ -824,18 +857,13 @@ function renderHome(){
     const songs=p?p.songs:[];
     const n=songs.length||x.n||0;
     const done=songs.filter(s=>(s.lyrics||"").trim()).length;
-    // one tick per song, lit when it has lyrics; long books fall back to a single bar
-    const meter = !n ? ""
-      : n<=140 ? `<div class="ticks">${songs.map(s=>`<i class="${(s.lyrics||"").trim()?"on":""}"></i>`).join("")}</div>`
-      : `<div class="tickbar"><i style="width:${Math.round(done/n*100)}%"></i></div>`;
+    const pct=n?Math.round(done/n*100):0;
     return `<div class="hrow${x.id===cur?" iscur":""}" data-id="${x.id}">
-      <div class="htop">
-        <div class="hb">${esc(x.band)}</div>
-        ${x.id===cur?'<span class="hcur">CURRENT</span>':""}
-        <button class="hx" title="Delete project">✕</button>
-      </div>
-      ${meter}
-      <div class="hs"><b>${n}</b> songs · <b>${done}</b> with lyrics · ${fmtWhen(x.updated)}</div>
+      <button class="hx" title="Delete project">✕</button>
+      ${x.id===cur?'<span class="hcur">CURRENT</span>':""}
+      <div class="hb">${esc(x.band)}</div>
+      <div class="hbar"><i style="width:${pct}%"></i></div>
+      <div class="hs"><span><b>${done}</b> of <b>${n}</b> with lyrics</span><span class="dotsep">·</span><span>${fmtWhen(x.updated)}</span></div>
     </div>`;
   }).join("");
   el.querySelectorAll(".hrow").forEach(r=>{
