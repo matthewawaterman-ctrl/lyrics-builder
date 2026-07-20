@@ -64,14 +64,23 @@
   .pvwrap>.preview{flex:1}
   #pvexit{display:none;position:absolute;top:16px;right:18px;z-index:5;background:rgba(0,0,0,.06);border:1px solid #c9c9c9;color:#333;border-radius:9px;padding:8px 14px;cursor:pointer;font-size:14px;font-family:Helvetica,Arial,sans-serif}
   #pvexit:hover{background:rgba(0,0,0,.12)}
-  .pvwrap.fs{background:#fff}
-  .pvwrap.fs #pvexit{display:block}
+  .pvwrap.fs{background:#fff;display:flex;flex-direction:column}
+  .pvbar{display:none}
+  .pvwrap.fs .pvbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;
+    padding-top:calc(env(safe-area-inset-top) * .5 + 10px);
+    background:var(--panel);border-bottom:1px solid var(--line);color:var(--text)}
+  .pvwrap.fs .pvttl{font-weight:700;letter-spacing:.4px;max-width:38vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pvsizewrap{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;padding:0 6px}
+  .pvsizewrap input{width:130px;accent-color:var(--accent)}
+  #pvsizeval{min-width:24px;text-align:right}
+  .pvwrap.fs #pvexit{display:none}   /* toolbar has its own Exit */
+  .pvwrap.fs .preview{flex:1}
   .pvwrap.fs-max{position:fixed;inset:0;z-index:9999;background:#fff}
-  .pvwrap.fs .preview{padding:5vh 6vw}
-  .pvwrap.fs .preview .pTitle{font-size:clamp(26px,4.4vh,64px)}
-  .pvwrap.fs .preview .pSub{font-size:clamp(12px,1.9vh,24px)}
-  .pvwrap.fs .preview .pSec{font-size:clamp(12px,1.8vh,24px)}
-  .pvwrap.fs .preview .pLine{font-size:clamp(20px,3.1vh,46px);line-height:1.5}
+  .pvwrap.fs .preview{padding:4vh 6vw}
+  .pvwrap.fs .preview .pTitle{font-size:calc(var(--lp,20px) * 1.5)}
+  .pvwrap.fs .preview .pSub{font-size:calc(var(--lp,20px) * 0.62)}
+  .pvwrap.fs .preview .pSec{font-size:var(--sl,13px)}
+  .pvwrap.fs .preview .pLine{font-size:var(--lp,20px);line-height:1.5}
   #pdfoverlay{display:none;position:fixed;inset:0;z-index:9998;background:#141417;flex-direction:column}
   #pdfoverlay.show{display:flex}
   #pdfoverlay .pdfbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -79,46 +88,47 @@
   #pdfoverlay .pdfsub{color:var(--muted);font-size:12px}
   #pdfoverlay iframe{flex:1;width:100%;border:none;background:#333}
   #home{display:none;position:fixed;inset:0;z-index:9999;background:
-      radial-gradient(900px 520px at 82% -10%, rgba(224,179,65,.08), transparent 58%),
+      radial-gradient(1200px 700px at 50% -20%, rgba(224,179,65,.10), transparent 62%),
       var(--bg);
-    overflow:auto;
-    padding:calc(env(safe-area-inset-top) + 48px) calc(env(safe-area-inset-right) + 34px)
-            calc(env(safe-area-inset-bottom) + 44px) calc(env(safe-area-inset-left) + 34px)}
-  #home.show{display:block}
-  .homebox{width:min(1040px,100%);margin:0 auto;display:grid;gap:34px;align-content:start}
-  .homehero{display:flex;flex-direction:column;gap:18px}
-  .homehd{font-size:clamp(34px,5vw,52px);font-weight:800;letter-spacing:-1.6px;line-height:.96}
+    overflow:auto}
+  #home.show{display:flex}
+  .homebox{width:min(760px,100%);margin:auto;
+    padding:calc(env(safe-area-inset-top) + 56px) calc(env(safe-area-inset-right) + 26px)
+            calc(env(safe-area-inset-bottom) + 48px) calc(env(safe-area-inset-left) + 26px);
+    display:flex;flex-direction:column;align-items:center;gap:38px}
+  .homehero{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
+  .homehd{font-size:clamp(40px,7vw,68px);font-weight:800;letter-spacing:-2px;line-height:1}
   .homehd em{font-style:normal;color:var(--accent)}
-  .homerule{height:3px;width:56px;background:var(--accent);border-radius:3px}
-  .homesub{color:var(--muted);font-size:15px;line-height:1.55;max-width:36ch}
-  .homesec{font-size:11px;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted);margin-bottom:2px}
-  #homelist{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));margin-bottom:26px}
-  .hrow{display:block;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel);
+  .homesub{color:var(--muted);font-size:15.5px;line-height:1.55;max-width:44ch}
+  .homever{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);opacity:.7}
+  .homepanel{width:100%;display:flex;flex-direction:column}
+  .homesec{font-size:11px;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted);
+    text-align:center;margin-bottom:14px;display:flex;align-items:center;gap:12px;justify-content:center}
+  .homesec::before,.homesec::after{content:"";height:1px;width:44px;background:var(--line)}
+  #homelist{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));margin-bottom:26px}
+  #homelist.solo{grid-template-columns:minmax(340px,440px);justify-content:center}
+  .hrow{display:block;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--panel);
     cursor:pointer;position:relative;transition:border-color .14s,background .14s}
   .hrow:hover{border-color:rgba(224,179,65,.5);background:var(--panel2)}
   .hrow.iscur{border-color:rgba(224,179,65,.35)}
   .hrow .hcur{display:inline-block;font-size:9px;color:var(--accent);border:1px solid rgba(224,179,65,.45);
     border-radius:20px;padding:2px 9px;letter-spacing:1.2px;margin-bottom:11px}
-  .hrow .hb{font-weight:800;font-size:21px;letter-spacing:.4px;text-transform:uppercase;line-height:1.1;
+  .hrow .hb{font-weight:800;font-size:22px;letter-spacing:.4px;text-transform:uppercase;line-height:1.1;
     padding-right:34px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .hrow .hx{position:absolute;top:15px;right:14px;border:none;background:transparent;color:var(--muted);
+  .hrow .hx{position:absolute;top:16px;right:14px;border:none;background:transparent;color:var(--muted);
     cursor:pointer;font-size:15px;opacity:0;width:32px;height:32px;border-radius:9px}
   .hrow:hover .hx{opacity:.5}
   .hrow .hx:hover{color:var(--red);opacity:1;background:rgba(224,100,75,.12)}
-  .hrow .hbar{height:5px;border-radius:5px;background:var(--line);overflow:hidden;margin:15px 0 10px}
+  .hrow .hbar{height:5px;border-radius:5px;background:var(--line);overflow:hidden;margin:16px 0 11px}
   .hrow .hbar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),rgba(224,179,65,.7));border-radius:5px}
   .hrow .hs{color:var(--muted);font-size:12.5px;letter-spacing:.2px;display:flex;gap:6px;flex-wrap:wrap}
   .hrow .hs b{color:var(--text);font-weight:600}
   .hrow .hs .dotsep{opacity:.4}
-  .homeempty{color:var(--muted);border:1px dashed var(--line);border-radius:16px;padding:38px;text-align:center;line-height:1.7}
-  .homebtns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .homeempty{color:var(--muted);border:1px dashed var(--line);border-radius:16px;padding:40px;text-align:center;line-height:1.7}
+  .homebtns{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
   .homebtns .primary,.homebtns .ghost,.homebtns .pill{min-height:44px}
-  .homefoot{color:var(--muted);font-size:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:16px;line-height:1.6}
-  @media (min-width:900px){
-    .homebox{grid-template-columns:300px 1fr;gap:56px;align-items:start}
-    .homehero{position:sticky;top:8px}
-  }
-  @media (max-width:899px){ .homehd{font-size:clamp(30px,7vw,42px)} }
+  .homefoot{color:var(--muted);font-size:12px;margin-top:26px;border-top:1px solid var(--line);padding-top:16px;line-height:1.6;text-align:center}
+  @media (max-width:520px){ .homebtns span[style]{display:none} .homebtns{gap:8px} }
   @media (prefers-reduced-motion:reduce){ .hrow{transition:none} }
   /* ---- touch / iPad ---- */
   .row .mv,.slrow .mv{display:none}
@@ -306,11 +316,11 @@
 <div id="home">
   <div class="homebox">
     <div class="homehero">
-      <div class="homehd">Lyrics<br><em>Builder</em></div>
-      <div class="homerule"></div>
+      <div class="homehd">Lyrics <em>Builder</em></div>
       <div class="homesub">Build a lyric book and a stage setlist from the same songs, then send clean PDFs to ForScore.</div>
+      <div class="homever" id="homever"></div>
     </div>
-    <div>
+    <div class="homepanel">
       <div class="homesec">Your projects</div>
       <div id="homelist"></div>
       <div class="homebtns">
@@ -368,7 +378,7 @@
 <script>
 const SEED_META = [{"t": "Ain't Nobody", "a": "Chaka Khan", "k": "Eb minor", "b": 104}, {"t": "All I Wanted", "a": "Paramore", "k": "F#", "b": 144}, {"t": "All The Small Things", "a": "Blink-182", "k": "C", "b": 149}, {"t": "Another One Bites The Dust", "a": "Queen", "k": "F minor", "b": 112}, {"t": "At Last", "a": "Etta James", "k": "F", "b": 87}, {"t": "Barracuda", "a": "Heart", "k": "E", "b": 137}, {"t": "Black Hole Sun", "a": "Soundgarden", "k": "A minor", "b": 117}, {"t": "Build Me Up Buttercup", "a": "The Foundations", "k": "C", "b": 134}, {"t": "Car Wash", "a": "Rose Royce", "k": "C minor", "b": 183}, {"t": "Closer", "a": "Ne-Yo", "k": "E minor", "b": 126}, {"t": "Crazy", "a": "Gnarls Barkley", "k": "G#", "b": 112}, {"t": "Creep", "a": "Radiohead", "k": "C", "b": 90}, {"t": "Cruisin'", "a": "Smokey Robinson", "k": "Ab", "b": 85}, {"t": "Don't Stop Me Now", "a": "Queen", "k": "G", "b": 159}, {"t": "Dream On", "a": "Aerosmith", "k": "F minor", "b": 74}, {"t": "Fuck You", "a": "CeeLo Green", "k": "C", "b": 127}, {"t": "Give A Little Bit", "a": "Supertramp", "k": "D", "b": 91}, {"t": "Go Your Own Way", "a": "Fleetwood Mac", "k": "G", "b": 136}, {"t": "Hard To Handle", "a": "Otis Redding", "k": "Bb", "b": 96}, {"t": "Heartbreaker", "a": "Pat Benatar", "k": "C#", "b": 156}, {"t": "Hella Good", "a": "No Doubt", "k": "G#", "b": 117}, {"t": "Higher", "a": "Creed", "k": "D", "b": 155}, {"t": "Higher And Higher", "a": "Jackie Wilson", "k": "D", "b": 96}, {"t": "Higher Ground", "a": "Stevie Wonder", "k": "C# minor", "b": 125}, {"t": "Highway To Hell", "a": "AC/DC", "k": "F# Minor", "b": 116}, {"t": "Holy Diver", "a": "Dio", "k": "C minor", "b": 93}, {"t": "Hot N Cold", "a": "Katy Perry", "k": "G", "b": 130}, {"t": "I Believe In A Thing Called Love", "a": "The Darkness", "k": "E", "b": 128}, {"t": "I Can See Clearly Now", "a": "Johnny Nash", "k": "D", "b": 123}, {"t": "I Heard It Through The Grapevine", "a": "Marvin Gaye", "k": "G#", "b": 117}, {"t": "I Put A Spell On You", "a": "Joss Stone & Jeff Beck", "k": "F# minor", "b": 58}, {"t": "I Want It That Way", "a": "Backstreet Boys", "k": "F# minor", "b": 99}, {"t": "I Want You Back", "a": "Jackson 5", "k": "Ab", "b": 98}, {"t": "I Want You To Want Me", "a": "Cheap Trick", "k": "D", "b": 206}, {"t": "I'm The Only One", "a": "Melissa Etheridge", "k": "C", "b": 85}, {"t": "I'm Your Baby Tonight", "a": "Whitney Houston", "k": "F#", "b": 165}, {"t": "I2I (Goofy Movie)", "a": "Tevin Campbell", "k": "A", "b": 128}, {"t": "If It Makes You Happy", "a": "Sheryl Crow", "k": "G", "b": 95}, {"t": "Immigrant Song", "a": "Led Zeppelin", "k": "F# minor", "b": 112}, {"t": "Kickstart My Heart", "a": "Mötley Crüe", "k": "G minor", "b": 178}, {"t": "Kiss", "a": "Prince", "k": "A", "b": 112}, {"t": "Kiss Me", "a": "Sixpence None The Richer", "k": "Eb", "b": 100}, {"t": "Knock On Wood", "a": "Eddie Floyd", "k": "E", "b": 125}, {"t": "Lady Marmalade", "a": "Patti LaBelle", "k": "D minor", "b": 118}, {"t": "Livin' La Vida Loca", "a": "Ricky Martin", "k": "C# minor", "b": 178}, {"t": "Livin' On A Prayer", "a": "Bon Jovi", "k": "E minor", "b": 122}, {"t": "Lola", "a": "The Kinks", "k": "E", "b": 152}, {"t": "Love On Top", "a": "Beyoncé", "k": "C", "b": 100}, {"t": "Lovefool", "a": "The Cardigans", "k": "A", "b": 112}, {"t": "Man! I Feel Like A Woman!", "a": "Shania Twain", "k": "Bb", "b": 123}, {"t": "Midnight Train To Georgia", "a": "Gladys Knight & The Pips", "k": "A# minor", "b": 90}, {"t": "My Own Worst Enemy", "a": "Lit", "k": "E", "b": 104}, {"t": "Natural Woman", "a": "Aretha Franklin", "k": "C", "b": 112}, {"t": "Never Too Much", "a": "Luther Vandross", "k": "D", "b": 110}, {"t": "Objection (Tango)", "a": "Shakira", "k": "B minor", "b": 89}, {"t": "On The Radio", "a": "Donna Summer", "k": "E minor", "b": 127}, {"t": "Paint It, Black", "a": "The Rolling Stones", "k": "D minor", "b": 159}, {"t": "Paranoid", "a": "Black Sabbath", "k": "E minor", "b": 163}, {"t": "Photograph", "a": "Nickelback", "k": "Eb", "b": 73}, {"t": "Pour Some Sugar On Me", "a": "Def Leppard", "k": "C# minor", "b": 85}, {"t": "Respect", "a": "Aretha Franklin", "k": "C", "b": 115}, {"t": "River Deep, Mountain High", "a": "Tina Turner", "k": "Eb", "b": 155}, {"t": "Rock With You", "a": "Michael Jackson", "k": "Eb minor", "b": 114}, {"t": "Ruby Soho", "a": "Rancid", "k": "G", "b": 162}, {"t": "Santeria", "a": "Sublime", "k": "C# minor", "b": 91}, {"t": "Separate Ways", "a": "Journey", "k": "B minor", "b": 82}, {"t": "She", "a": "Green Day", "k": "C# minor", "b": 190}, {"t": "Shine", "a": "Collective Soul", "k": "D", "b": 75}, {"t": "Shining Star", "a": "Earth, Wind & Fire", "k": "E minor", "b": 100}, {"t": "Simple Man", "a": "Lynyrd Skynyrd", "k": "C", "b": 120}, {"t": "Since U Been Gone", "a": "Kelly Clarkson", "k": "G", "b": 132}, {"t": "Sk8er Boi", "a": "Avril Lavigne", "k": "D", "b": 150}, {"t": "Somebody Told Me", "a": "The Killers", "k": "Bb", "b": 138}, {"t": "Spooky", "a": "Dusty Springfield", "k": "E minor", "b": 106}, {"t": "Still Of The Night", "a": "Whitesnake", "k": "E", "b": 100}, {"t": "Sugar, We're Goin Down", "a": "Fall Out Boy", "k": "G", "b": 162}, {"t": "Sweet Child O' Mine", "a": "Guns N' Roses", "k": "D", "b": 127}, {"t": "Take It On The Run", "a": "REO Speedwagon", "k": "G", "b": 78}, {"t": "Tears Of A Clown", "a": "Smokey Robinson", "k": "C#", "b": 128}, {"t": "The Kids Aren't Alright", "a": "The Offspring", "k": "Bb minor", "b": 100}, {"t": "The Reason", "a": "Hoobastank", "k": "B", "b": 159}, {"t": "The Trooper", "a": "Iron Maiden", "k": "E minor", "b": 160}, {"t": "Them Changes", "a": "Thundercat", "k": "E minor", "b": 81}, {"t": "This Love", "a": "Maroon 5", "k": "C minor", "b": 95}, {"t": "Toxic", "a": "Britney Spears", "k": "C minor", "b": 143}, {"t": "Umbrella", "a": "Rihanna", "k": "C# minor", "b": 87}, {"t": "Unwritten", "a": "Natasha Bedingfield", "k": "F", "b": 100}, {"t": "What I Like About You", "a": "The Romantics", "k": "A", "b": 160}, {"t": "When It's Over", "a": "Sugar Ray", "k": "G", "b": 100}, {"t": "Yeah!", "a": "Usher", "k": "G minor", "b": 105}, {"t": "You Oughta Know", "a": "Alanis Morissette", "k": "E", "b": 105}, {"t": "Your Love", "a": "The Outfield", "k": "C#", "b": 160}];
 const SEED_BAND = "THE UNTRUSTABLES";
-const BUILD = "2026.07.17j";               // bump on each ship; shown in the corner
+const BUILD = "2026.07.20b";               // bump on each ship; shown in the corner
 const OLD_KEY = "lyrics_the_untrustables_v1";                 // pre-multiproject autosave key (one-time migration)
 const uid = () => "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
@@ -568,6 +578,45 @@ function importProjectFile(file){
 // ---- collapsible panels ----
 function toggleCol(which){ document.getElementById("main").classList.toggle(which==="ed"?"ed-off":"pv-off"); }
 let _fsMax=false;
+function pvSyncBar(){
+  if(active===null) return;
+  const s=data[active];
+  document.getElementById("pvttl").textContent=s.t.toUpperCase();
+  const sz=Math.round(songSize(s));
+  const sl=document.getElementById("pvsize"); if(sl) sl.value=sz;
+  const sv=document.getElementById("pvsizeval"); if(sv) sv.textContent=sz;
+  // reflect which override is active
+  const song=!!s.size, book=!project||!project.bookSize?false:!s.size;
+  document.getElementById("pvsizesong").classList.toggle("on", song);
+  document.getElementById("pvsizeall").classList.toggle("on", !!(project&&project.bookSize)&&!song);
+  document.getElementById("pvsizeauto").classList.toggle("on", !song && !(project&&project.bookSize));
+}
+function pvSetSize(px,scope){
+  if(active===null) return;
+  px=Math.max(SIZE_MIN,Math.min(SIZE_MAX,px));
+  const s=data[active];
+  if(scope==="song"){ s.size=px; }
+  else if(scope==="all"){ project.bookSize=px; delete s.size; }   // book-wide; clear this song's own override so it takes effect
+  persist(); renderPreview(s); pvSyncBar();
+}
+function pvSizeAuto(){
+  if(active===null) return;
+  const s=data[active];
+  delete s.size;
+  if(project) delete project.bookSize;
+  _gsize=null; persist(); renderPreview(s); pvSyncBar();
+}
+function pvSongTXT(){
+  if(active===null) return; const s=data[active];
+  if(!s.lyrics.trim()){ toast("Add lyrics first"); return; }
+  const blocks=autoSection(parseBlocks(s.lyrics));
+  const lines=[s.t.toUpperCase()];
+  if(s.a||s.k||s.b) lines.push([s.a,s.k,s.b?s.b+" BPM":""].filter(Boolean).join("  |  ").toUpperCase());
+  lines.push("");
+  blocks.forEach(b=>{ if(b.section) lines.push("["+b.section.toUpperCase()+"]"); b.lines.forEach(l=>lines.push(l.toUpperCase())); lines.push(""); });
+  dlFile(lines.join("\n").replace(/\n+$/,"")+"\n",(s.t.replace(/[^A-Za-z0-9]+/g,"_")||"Song")+".txt","text/plain;charset=utf-8");
+  toast(`Saved “${s.t}” as text`);
+}
 function togglePreviewFS(){
   const wrap=document.getElementById("pvwrap"); if(!wrap) return;
   if(wrap.classList.contains("fs")){                       // exit
@@ -576,15 +625,29 @@ function togglePreviewFS(){
     return;
   }
   const req=wrap.requestFullscreen;                          // enter
-  if(req) req.call(wrap).catch(()=>{ _fsMax=true; wrap.classList.add("fs","fs-max"); });
-  else { _fsMax=true; wrap.classList.add("fs","fs-max"); }
+  if(req) req.call(wrap).catch(()=>{ _fsMax=true; wrap.classList.add("fs","fs-max"); pvSyncBar(); });
+  else { _fsMax=true; wrap.classList.add("fs","fs-max"); pvSyncBar(); }
 }
 document.addEventListener("fullscreenchange",()=>{
   const wrap=document.getElementById("pvwrap"); if(!wrap) return;
-  if(document.fullscreenElement===wrap) wrap.classList.add("fs");
+  if(document.fullscreenElement===wrap){ wrap.classList.add("fs"); pvSyncBar(); }
   else if(!_fsMax) wrap.classList.remove("fs","fs-max");
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape" && _fsMax){ const w=document.getElementById("pvwrap"); if(w){ w.classList.remove("fs","fs-max"); _fsMax=false; } } });
+function initPreviewBar(){
+  const g=id=>document.getElementById(id);
+  if(!g("pvsize")) return;
+  g("pvsize").oninput=e=>{ // live drag applies to current scope: song if it has one, else book if set, else song
+    const s=data[active]; const scope = s.size ? "song" : ((project&&project.bookSize)?"all":"song");
+    pvSetSize(+e.target.value, scope);
+  };
+  g("pvsizesong").onclick=()=>pvSetSize(+g("pvsize").value,"song");
+  g("pvsizeall").onclick=()=>pvSetSize(+g("pvsize").value,"all");
+  g("pvsizeauto").onclick=pvSizeAuto;
+  g("pvsongpdf").onclick=exportSongPDF;
+  g("pvsongtxt").onclick=pvSongTXT;
+  g("pvexit2").onclick=togglePreviewFS;
+}
 // ---- export a single song as its own PDF ----
 function exportSongPDF(){
   if(active===null) return;
@@ -866,6 +929,7 @@ function renderHome(){
       <div class="hs"><span><b>${done}</b> of <b>${n}</b> with lyrics</span><span class="dotsep">·</span><span>${fmtWhen(x.updated)}</span></div>
     </div>`;
   }).join("");
+  el.classList.toggle("solo", ix.length===1);
   el.querySelectorAll(".hrow").forEach(r=>{
     const id=r.dataset.id;
     r.onclick=()=>{ loadProject(id); closeHome(); };
@@ -879,7 +943,7 @@ function renderHome(){
     };
   });
 }
-function openHome(){ renderHome(); document.getElementById("home").classList.add("show"); }
+function openHome(){ renderHome(); const v=document.getElementById("homever"); if(v) v.textContent="Version "+BUILD; document.getElementById("home").classList.add("show"); }
 function closeHome(){ if(!project) { toast("Open or create a project first"); return; } document.getElementById("home").classList.remove("show"); }
 function initHomeUI(){
   document.getElementById("homebtn").onclick=openHome;
@@ -1012,6 +1076,13 @@ function autoSection(blocks){
 // Largest size in [FLOOR..MAX] at which essentially every line fits on one line.
 // Won't shrink the whole book below FLOOR just to save a rare long line (those wrap).
 function _measDoc(){ if(!window.__md) window.__md=new window.jspdf.jsPDF({unit:"pt",format:"letter"}); return window.__md; }
+// resolved lyric font size: per-song override wins, then book-wide override, then auto-fit
+function songSize(s){
+  if(s && s.size) return s.size;
+  if(project && project.bookSize) return project.bookSize;
+  return computeGlobalSize();
+}
+const SIZE_MIN=10, SIZE_MAX=48;
 function computeGlobalSize(){
   if(_gsize!=null) return _gsize;
   const FLOOR=14, MAX=20, doc=_measDoc();
@@ -1133,6 +1204,17 @@ function renderMain(){
       </div>
       <div class="col pv"><div class="lbl" onclick="toggleCol('pv')"><span class="chev">▾</span> Live preview — how the page will look<button class="fsbtn" title="Fullscreen preview" onclick="event.stopPropagation();togglePreviewFS()">⛶ Fullscreen</button></div>
         <div class="pvwrap" id="pvwrap">
+          <div class="pvbar" id="pvbar">
+            <span class="pvttl" id="pvttl"></span>
+            <span style="flex:1"></span>
+            <label class="pvsizewrap" title="Font size">A<input type="range" id="pvsize" min="10" max="48" step="1"><span id="pvsizeval"></span></label>
+            <button class="ghost" id="pvsizesong" title="Apply this size to just this song">This song</button>
+            <button class="ghost" id="pvsizeall" title="Apply this size to every song in the project">All songs</button>
+            <button class="ghost" id="pvsizeauto" title="Clear override, auto-fit the book">Auto</button>
+            <button class="ghost" id="pvsongpdf" title="Export this song as a PDF">⤓ PDF</button>
+            <button class="ghost" id="pvsongtxt" title="Export this song as plain text">⤓ TXT</button>
+            <button class="ghost" id="pvexit2" title="Exit fullscreen (Esc)">✕ Exit</button>
+          </div>
           <div class="preview" id="pv"></div>
           <button id="pvexit" onclick="togglePreviewFS()" title="Exit fullscreen (Esc)">✕ Exit</button>
         </div>
@@ -1153,7 +1235,7 @@ function renderMain(){
 function esc(t){return t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
 function renderPreview(s){
   const pv=document.getElementById("pv"); if(!pv)return;
-  const gs=computeGlobalSize();
+  const gs=songSize(s);
   pv.style.setProperty("--lp", gs+"px");
   pv.style.setProperty("--sl", Math.max(10,Math.round(gs*0.62))+"px");
   let html=`<div class="pTitle">${esc(s.t.toUpperCase())}</div><div class="pSub">${esc(s.a.toUpperCase())} &nbsp;|&nbsp; ${esc(s.k.toUpperCase())} &nbsp;|&nbsp; ${s.b} BPM</div>`;
@@ -1345,9 +1427,6 @@ function buildPDF(opts){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({unit:"pt",format:"letter"});
   const W=doc.internal.pageSize.getWidth(), H=doc.internal.pageSize.getHeight(), M=50;
-  const LP=computeGlobalSize();                 // one size for the whole setlist
-  const LH=Math.round(LP*1.45), SL=Math.max(10,Math.round(LP*0.62));
-  const LBEF=Math.round(LP*0.4), LAFT=Math.round(LP*1.35);   // gaps around section labels
   const songs=opts.songs?[...opts.songs]:[...data];   // project order drives body + TOC
   const withTOC = opts.toc!==false && songs.length>1;
 
@@ -1371,6 +1450,9 @@ function buildPDF(opts){
 
   // ---- songs ----
   songs.forEach((s,si)=>{
+    const LP=songSize(s);                       // per-song > book-wide > auto
+    const LH=Math.round(LP*1.45), SL=Math.max(10,Math.round(LP*0.62));
+    const LBEF=Math.round(LP*0.4), LAFT=Math.round(LP*1.35);
     if(withTOC || si>0) doc.addPage();        // single song uses page 1; otherwise each gets a page
     const pg=doc.getCurrentPageInfo().pageNumber;
     doc.outline.add(null,s.t.toUpperCase(),{pageNumber:pg});
@@ -1433,6 +1515,7 @@ function init(){
   initListDnD();
   initSetlistUI();
   initHomeUI();
+  initPreviewBar();
   migrateIfNeeded();
   let cid=Store.current();
   if(!cid || !Store.get(cid)){ const ix=Store.index(); cid=ix.length?ix[0].id:null; }
