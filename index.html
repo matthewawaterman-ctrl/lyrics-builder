@@ -92,29 +92,29 @@
       var(--bg);
     overflow:auto}
   #home.show{display:flex}
-  .homebox{width:min(760px,100%);margin:auto;
-    padding:calc(env(safe-area-inset-top) + 56px) calc(env(safe-area-inset-right) + 26px)
-            calc(env(safe-area-inset-bottom) + 48px) calc(env(safe-area-inset-left) + 26px);
-    display:flex;flex-direction:column;align-items:center;gap:38px}
+  .homebox{width:min(1080px,100%);margin:auto;
+    padding:calc(env(safe-area-inset-top) + 52px) calc(env(safe-area-inset-right) + 40px)
+            calc(env(safe-area-inset-bottom) + 48px) calc(env(safe-area-inset-left) + 40px);
+    display:flex;flex-direction:column;align-items:center;gap:36px}
   .homehero{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
   .homehd{font-size:clamp(40px,7vw,68px);font-weight:800;letter-spacing:-2px;line-height:1}
   .homehd em{font-style:normal;color:var(--accent)}
-  .homesub{color:var(--muted);font-size:15.5px;line-height:1.55;max-width:44ch}
+  .homesub{color:var(--muted);font-size:15.5px;line-height:1.55;max-width:52ch}
   .homever{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);opacity:.7}
   .homepanel{width:100%;display:flex;flex-direction:column}
   .homesec{font-size:11px;text-transform:uppercase;letter-spacing:1.6px;color:var(--muted);
     text-align:center;margin-bottom:14px;display:flex;align-items:center;gap:12px;justify-content:center}
   .homesec::before,.homesec::after{content:"";height:1px;width:44px;background:var(--line)}
-  #homelist{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));margin-bottom:26px}
-  #homelist.solo{grid-template-columns:minmax(340px,440px);justify-content:center}
+  #homelist{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));margin-bottom:26px;width:100%}
+  #homelist.solo{grid-template-columns:minmax(420px,560px);justify-content:center}
   .hrow{display:block;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--panel);
     cursor:pointer;position:relative;transition:border-color .14s,background .14s}
   .hrow:hover{border-color:rgba(224,179,65,.5);background:var(--panel2)}
   .hrow.iscur{border-color:rgba(224,179,65,.35)}
   .hrow .hcur{display:inline-block;font-size:9px;color:var(--accent);border:1px solid rgba(224,179,65,.45);
     border-radius:20px;padding:2px 9px;letter-spacing:1.2px;margin-bottom:11px}
-  .hrow .hb{font-weight:800;font-size:22px;letter-spacing:.4px;text-transform:uppercase;line-height:1.1;
-    padding-right:34px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hrow .hb{font-weight:800;font-size:22px;letter-spacing:.4px;text-transform:uppercase;line-height:1.15;
+    padding-right:30px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .hrow .hx{position:absolute;top:16px;right:14px;border:none;background:transparent;color:var(--muted);
     cursor:pointer;font-size:15px;opacity:0;width:32px;height:32px;border-radius:9px}
   .hrow:hover .hx{opacity:.5}
@@ -234,7 +234,7 @@
   .menupop button{background:transparent;border:none;color:var(--text);text-align:left;padding:8px 10px;border-radius:7px;cursor:pointer;font:inherit}
   .menupop button:hover{background:var(--panel2)}
   .menupop button.danger{color:#e0644b}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:100}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:10001}
   .modal.show{display:flex}
   .modalbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;width:min(560px,92vw)}
   .modalbox-wide{width:min(700px,95vw)}
@@ -378,7 +378,7 @@
 <script>
 const SEED_META = [{"t": "Ain't Nobody", "a": "Chaka Khan", "k": "Eb minor", "b": 104}, {"t": "All I Wanted", "a": "Paramore", "k": "F#", "b": 144}, {"t": "All The Small Things", "a": "Blink-182", "k": "C", "b": 149}, {"t": "Another One Bites The Dust", "a": "Queen", "k": "F minor", "b": 112}, {"t": "At Last", "a": "Etta James", "k": "F", "b": 87}, {"t": "Barracuda", "a": "Heart", "k": "E", "b": 137}, {"t": "Black Hole Sun", "a": "Soundgarden", "k": "A minor", "b": 117}, {"t": "Build Me Up Buttercup", "a": "The Foundations", "k": "C", "b": 134}, {"t": "Car Wash", "a": "Rose Royce", "k": "C minor", "b": 183}, {"t": "Closer", "a": "Ne-Yo", "k": "E minor", "b": 126}, {"t": "Crazy", "a": "Gnarls Barkley", "k": "G#", "b": 112}, {"t": "Creep", "a": "Radiohead", "k": "C", "b": 90}, {"t": "Cruisin'", "a": "Smokey Robinson", "k": "Ab", "b": 85}, {"t": "Don't Stop Me Now", "a": "Queen", "k": "G", "b": 159}, {"t": "Dream On", "a": "Aerosmith", "k": "F minor", "b": 74}, {"t": "Fuck You", "a": "CeeLo Green", "k": "C", "b": 127}, {"t": "Give A Little Bit", "a": "Supertramp", "k": "D", "b": 91}, {"t": "Go Your Own Way", "a": "Fleetwood Mac", "k": "G", "b": 136}, {"t": "Hard To Handle", "a": "Otis Redding", "k": "Bb", "b": 96}, {"t": "Heartbreaker", "a": "Pat Benatar", "k": "C#", "b": 156}, {"t": "Hella Good", "a": "No Doubt", "k": "G#", "b": 117}, {"t": "Higher", "a": "Creed", "k": "D", "b": 155}, {"t": "Higher And Higher", "a": "Jackie Wilson", "k": "D", "b": 96}, {"t": "Higher Ground", "a": "Stevie Wonder", "k": "C# minor", "b": 125}, {"t": "Highway To Hell", "a": "AC/DC", "k": "F# Minor", "b": 116}, {"t": "Holy Diver", "a": "Dio", "k": "C minor", "b": 93}, {"t": "Hot N Cold", "a": "Katy Perry", "k": "G", "b": 130}, {"t": "I Believe In A Thing Called Love", "a": "The Darkness", "k": "E", "b": 128}, {"t": "I Can See Clearly Now", "a": "Johnny Nash", "k": "D", "b": 123}, {"t": "I Heard It Through The Grapevine", "a": "Marvin Gaye", "k": "G#", "b": 117}, {"t": "I Put A Spell On You", "a": "Joss Stone & Jeff Beck", "k": "F# minor", "b": 58}, {"t": "I Want It That Way", "a": "Backstreet Boys", "k": "F# minor", "b": 99}, {"t": "I Want You Back", "a": "Jackson 5", "k": "Ab", "b": 98}, {"t": "I Want You To Want Me", "a": "Cheap Trick", "k": "D", "b": 206}, {"t": "I'm The Only One", "a": "Melissa Etheridge", "k": "C", "b": 85}, {"t": "I'm Your Baby Tonight", "a": "Whitney Houston", "k": "F#", "b": 165}, {"t": "I2I (Goofy Movie)", "a": "Tevin Campbell", "k": "A", "b": 128}, {"t": "If It Makes You Happy", "a": "Sheryl Crow", "k": "G", "b": 95}, {"t": "Immigrant Song", "a": "Led Zeppelin", "k": "F# minor", "b": 112}, {"t": "Kickstart My Heart", "a": "Mötley Crüe", "k": "G minor", "b": 178}, {"t": "Kiss", "a": "Prince", "k": "A", "b": 112}, {"t": "Kiss Me", "a": "Sixpence None The Richer", "k": "Eb", "b": 100}, {"t": "Knock On Wood", "a": "Eddie Floyd", "k": "E", "b": 125}, {"t": "Lady Marmalade", "a": "Patti LaBelle", "k": "D minor", "b": 118}, {"t": "Livin' La Vida Loca", "a": "Ricky Martin", "k": "C# minor", "b": 178}, {"t": "Livin' On A Prayer", "a": "Bon Jovi", "k": "E minor", "b": 122}, {"t": "Lola", "a": "The Kinks", "k": "E", "b": 152}, {"t": "Love On Top", "a": "Beyoncé", "k": "C", "b": 100}, {"t": "Lovefool", "a": "The Cardigans", "k": "A", "b": 112}, {"t": "Man! I Feel Like A Woman!", "a": "Shania Twain", "k": "Bb", "b": 123}, {"t": "Midnight Train To Georgia", "a": "Gladys Knight & The Pips", "k": "A# minor", "b": 90}, {"t": "My Own Worst Enemy", "a": "Lit", "k": "E", "b": 104}, {"t": "Natural Woman", "a": "Aretha Franklin", "k": "C", "b": 112}, {"t": "Never Too Much", "a": "Luther Vandross", "k": "D", "b": 110}, {"t": "Objection (Tango)", "a": "Shakira", "k": "B minor", "b": 89}, {"t": "On The Radio", "a": "Donna Summer", "k": "E minor", "b": 127}, {"t": "Paint It, Black", "a": "The Rolling Stones", "k": "D minor", "b": 159}, {"t": "Paranoid", "a": "Black Sabbath", "k": "E minor", "b": 163}, {"t": "Photograph", "a": "Nickelback", "k": "Eb", "b": 73}, {"t": "Pour Some Sugar On Me", "a": "Def Leppard", "k": "C# minor", "b": 85}, {"t": "Respect", "a": "Aretha Franklin", "k": "C", "b": 115}, {"t": "River Deep, Mountain High", "a": "Tina Turner", "k": "Eb", "b": 155}, {"t": "Rock With You", "a": "Michael Jackson", "k": "Eb minor", "b": 114}, {"t": "Ruby Soho", "a": "Rancid", "k": "G", "b": 162}, {"t": "Santeria", "a": "Sublime", "k": "C# minor", "b": 91}, {"t": "Separate Ways", "a": "Journey", "k": "B minor", "b": 82}, {"t": "She", "a": "Green Day", "k": "C# minor", "b": 190}, {"t": "Shine", "a": "Collective Soul", "k": "D", "b": 75}, {"t": "Shining Star", "a": "Earth, Wind & Fire", "k": "E minor", "b": 100}, {"t": "Simple Man", "a": "Lynyrd Skynyrd", "k": "C", "b": 120}, {"t": "Since U Been Gone", "a": "Kelly Clarkson", "k": "G", "b": 132}, {"t": "Sk8er Boi", "a": "Avril Lavigne", "k": "D", "b": 150}, {"t": "Somebody Told Me", "a": "The Killers", "k": "Bb", "b": 138}, {"t": "Spooky", "a": "Dusty Springfield", "k": "E minor", "b": 106}, {"t": "Still Of The Night", "a": "Whitesnake", "k": "E", "b": 100}, {"t": "Sugar, We're Goin Down", "a": "Fall Out Boy", "k": "G", "b": 162}, {"t": "Sweet Child O' Mine", "a": "Guns N' Roses", "k": "D", "b": 127}, {"t": "Take It On The Run", "a": "REO Speedwagon", "k": "G", "b": 78}, {"t": "Tears Of A Clown", "a": "Smokey Robinson", "k": "C#", "b": 128}, {"t": "The Kids Aren't Alright", "a": "The Offspring", "k": "Bb minor", "b": 100}, {"t": "The Reason", "a": "Hoobastank", "k": "B", "b": 159}, {"t": "The Trooper", "a": "Iron Maiden", "k": "E minor", "b": 160}, {"t": "Them Changes", "a": "Thundercat", "k": "E minor", "b": 81}, {"t": "This Love", "a": "Maroon 5", "k": "C minor", "b": 95}, {"t": "Toxic", "a": "Britney Spears", "k": "C minor", "b": 143}, {"t": "Umbrella", "a": "Rihanna", "k": "C# minor", "b": 87}, {"t": "Unwritten", "a": "Natasha Bedingfield", "k": "F", "b": 100}, {"t": "What I Like About You", "a": "The Romantics", "k": "A", "b": 160}, {"t": "When It's Over", "a": "Sugar Ray", "k": "G", "b": 100}, {"t": "Yeah!", "a": "Usher", "k": "G minor", "b": 105}, {"t": "You Oughta Know", "a": "Alanis Morissette", "k": "E", "b": 105}, {"t": "Your Love", "a": "The Outfield", "k": "C#", "b": 160}];
 const SEED_BAND = "THE UNTRUSTABLES";
-const BUILD = "2026.07.20b";               // bump on each ship; shown in the corner
+const BUILD = "2026.07.20c";               // bump on each ship; shown in the corner
 const OLD_KEY = "lyrics_the_untrustables_v1";                 // pre-multiproject autosave key (one-time migration)
 const uid = () => "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
